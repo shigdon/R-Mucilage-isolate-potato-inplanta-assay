@@ -1,0 +1,2682 @@
+---
+title: "Inoculating Potato Plantlets with Totontepec maize aerial root mucilage isolates"
+author: "Shawn Higdon"
+output:
+  html_notebook:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r}
+library(lsmeans)
+library(tidyverse)
+
+```
+
+# Read in the Datasets
+```{r}
+set_1 <- read.csv("./all_potato_data/Set1-Table 1.csv", header = T)
+set_2.1 <- read.csv("./all_potato_data/Set2_Day1-Table 1.csv", header = T) 
+set_2.2 <- read.csv("./all_potato_data/Set2_Day2-Table 1.csv", header = T)
+set_2.3 <- read.csv("./all_potato_data/Set2_Day3-Table 1.csv", header = T) 
+set_2.4 <- read.csv("./all_potato_data/Set2_Day4-Table 1.csv", header = T) 
+set_3.1 <- read.csv("./all_potato_data/Set3_Day1-Table 1.csv", header = T) 
+set_3.2 <- read.csv("./all_potato_data/Set3_Day2-Table 1.csv", header = T) 
+set_3.3 <- read.csv("./all_potato_data/Set3_Day3-Table 1.csv", header = T) 
+set_3.4 <- read.csv("./all_potato_data/Set3_Day4-Table 1.csv", header = T) 
+set_3.5 <- read.csv("./all_potato_data/Set3_Day5-Table 1.csv", header = T) 
+set_4.1 <- read.csv("./all_potato_data/Set4_Day1-Table 1.csv", header = T) 
+set_4.2 <- read.csv("./all_potato_data/Set4_Day2-Table 1.csv", header = T) 
+set_4.3 <- read.csv("./all_potato_data/Set4_Day3-Table 1.csv", header = T) 
+
+# combine all datasets
+master_set <- rbind(set_1, set_2.1, set_2.2, set_2.3, set_2.4, set_3.1, set_3.2, set_3.3, set_3.4, set_3.5, set_4.1, set_4.2, set_4.3)
+
+```
+
+## Create list of isolates
+```{r}
+potato_isolate_list <- as_tibble(unique(master_set$isolate)) # grab unique isolate IDs
+
+names(potato_isolate_list) <- "Isolate" # change variable name
+
+str(potato_isolate_list)
+
+potato_isolate_list <- potato_isolate_list %>%
+  mutate_if(is.factor, na_if, y = "") # add NA to empty values
+
+potato_isolate_list <- potato_isolate_list %>% 
+  filter(grepl("2", Isolate)) # remove rows without '2' prefix (non-isolate rows)
+
+potato_isolate_list$Isolate <- paste0('BCW-', potato_isolate_list$Isolate) # add BCW- prefix
+
+potato_isolate_list <- arrange(potato_isolate_list, Isolate) # arrange in descending order
+
+write_csv(potato_isolate_list, "./R_Output_Files/potato_isolate_list.csv", col_names = T)
+
+```
+
+
+# Statistical Analysis
+
+## Experimental Design
+
+* Potato plantlets purchased from Canada in bulk were individually transplanted into 1X MS media slants.
+* Mucilage Isolates were cultured in Luria's Broth (LB) to an OD600 value of 0.6.
+* 100 µL of each inoculum was applied to a plantlet vial, was sealed, and the vials were incubated at 28 ºC for 3 weeks.
+* Each inoculation was evaluated in triplicate.
+* All Isolates that were incorporated into the whole genome sequencing study were assessed with this assay.
+* The number of isolates to be screened led to the full list being assessed in batches:
+  * Batch 1
+  * Batch 2 (4 groups)
+  * Batch 3 (5 groups)
+  * Batch 4 (3 groups)
+
+## Linear Modeling
+
+Data measurements were fit to a linear model using the `lm` function of R.
+The normality of the data was assessed by visualizing parameters of each linear model in two ways:
+
+* Normal Q-Q plots (Standardized residuals vs. Theoretical Quantiles)
+* Scale - Location plots (Squareroot of Standard residuals vs. fitted values)
+
+## Anova
+
+One way analysis of variance was applied to each linear model as a preliminary assessment of each inoculation batch.
+
+## The LSMeans Package
+
+The LSMeans Package was used to calculate mean estimates, confidence intervals, and conduct multiple t-tests. Correction for multiple testing was implemented using either the Dunnett method, or the Tukey method (depending on the type of comparisons), and the adjusted p-values are presented in the outputs.
+
+## Compact Letter Display
+
+Compact Letter Display is a function in R that assigns a common label to each treatment group based on whether or not the confidence intervals of the mean estimations from LSMeans overlap with those of other treatment groups. If two treatment groups have non-overlapping confidence intervals associated with their mean estimates, they are not classified within the same group. This allows higher security in asserting that the mean estimates are truly different at the specified confidence level.  
+
+## Batch 1
+
+```{r}
+# analyze set 1 data
+str(set_1)
+
+#subset by sample type
+
+set_1_DR <- filter(set_1, sample == "DR")
+set_1_DS <- filter(set_1, sample == "DS")
+set_1_WR <- filter(set_1, sample == "WR")
+set_1_WS <- filter(set_1, sample == "WS")
+```
+
+**Experimental Design Table**
+
+| Structure | Factor | Type | # levels |
+|-----------|--------|------|----------|
+| Treatment | Isolate | Qualitative | 59 |
+| Design    | MS Media Slants | Experimental Unit | 177 |
+| Response  | Plant Tissue Weight | Observational Unit | 708 |
+|Response | Dry Root Weight (DR) | Variable | 177 | 
+| Response | Dry Shoot Weight (DS) | Variable | 177 |
+| Response | Wet Root Weight (WR) | Variable | 177 | 
+| Response | Wet Shoot Weight (WS) | Variable | 177 |
+
+* 57 Isolates
+* 2 controls
+  * control_W - 100 µL of saline solution
+  * control-WO - no added solution
+
+### 1.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_1_DR <- lm(mg ~ 1 + isolate, set_1_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_1_DR, which = c(2,3))
+par(op)
+```
+
+#### 1.1. - Anova
+
+```{r}
+anova(lm_set_1_DR)
+```
+
+#### 1.1. - LSMeans (Control_W) - Dunnett
+
+```{r}
+lsm_s1.dun.DR <- summary(lsmeans(lm_set_1_DR, trt.vs.ctrl ~isolate, ref=45)$contrasts, infer = c(T,T))
+write.csv(lsm_s1.dun.DR, "./lsmeans_summary_tables/lsm_s1.dun.DR.csv")
+```
+
+#### 1.1. - LSMeans (Control-WO) - Dunnett
+
+```{r}
+summary(lsmeans(lm_set_1_DR, trt.vs.ctrl ~isolate, ref=46)$contrasts, infer = c(T,T))
+```
+
+#### 1.1 - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_1_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_1_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+
+#### 1.1. - CLD - Mean Estimate Differences to Control_W
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control_W).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_DR, trt.vs.ctrl~isolate,ref=45)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control_W", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+#### 1.1. - CLD - Mean Estimate Differences to Control-WO
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control-WO).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_DR, trt.vs.ctrl~isolate,ref=46)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control-WO", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Based on the means comparison analyses above of the dry root weight measurements for plants of inoculation batch 1, there appears to be one isolate, BCW201858, that has a significant effect on the mean dry root weight. This is the most apparent when comparing to control_W, where the confidence intervals for these mean weight estimates do not overlap [see: 1.1 - CLD - Control_W (Pairwise by isolate)].
+
+### 1.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_1_DS <- lm(mg ~ 1 + isolate, set_1_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_1_DS, which = c(2,3))
+par(op)
+```
+
+#### 1.2. - Anova
+
+```{r}
+anova(lm_set_1_DS)
+```
+
+#### 1.2. - LSMeans (Control_W) - Dunnett
+
+```{r}
+lsm_s1.dun.DS <- summary(lsmeans(lm_set_1_DS, trt.vs.ctrl ~isolate, ref=45)$contrasts, infer = c(T,T))
+write.csv(lsm_s1.dun.DS, "./lsmeans_summary_tables/lsm_s1.dun.DS.csv")
+```
+
+#### 1.2. - LSMeans (Control-WO) - Dunnett
+
+```{r}
+summary(lsmeans(lm_set_1_DS, trt.vs.ctrl ~isolate, ref=46)$contrasts, infer = c(T,T))
+```
+
+#### 1.2 - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_1_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_1_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+
+#### 1.2. - CLD - Mean Estimate Differences to Control_W
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control_W).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_DS, trt.vs.ctrl~isolate,ref=45)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control_W", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+#### 1.2. - CLD - Mean Estimate Differences to Control-WO
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control-WO).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_DS, trt.vs.ctrl~isolate,ref=46)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control-WO", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW200727 has a mean estimate with non-overlaping Confidence intervals to those of the control_W estimate.
+
+### 1.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of Wet Root data
+lm_set_1_WR <- lm(mg ~ 1 + isolate, set_1_WR)
+#op = par(mfrow=c(1,2))
+plot(lm_set_1_WR, which = c(2,3))
+#par(op)
+```
+
+#### 1.3. - Anova
+
+```{r}
+anova(lm_set_1_WR)
+summary(lm_set_1_WR, infer=c(T,T))
+```
+
+#### 1.3. - LSMeans (Control_W)
+
+```{r}
+lsm_s1.dun.WR <- summary(lsmeans(lm_set_1_WR, trt.vs.ctrl ~isolate, ref=46)$contrasts, infer = c(T,T))
+write.csv(lsm_s1.dun.WR, "./lsmeans_summary_tables/lsm_s1.dun.WR.csv")
+```
+
+#### 1.3. - LSMeans (Control-WO)
+
+```{r}
+summary(lsmeans(lm_set_1_WR, trt.vs.ctrl ~isolate, ref=46)$contrasts, infer = c(T,T))
+```
+
+#### 1.3 - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_1_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_1_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+
+#### 1.3. - CLD - Mean Estimate Differences to Control_W
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control_W).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_WR, trt.vs.ctrl~isolate,ref=45)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control_W", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+#### 1.3. - CLD - Mean Estimate Differences to Control-WO
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control-WO).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_WR, trt.vs.ctrl~isolate,ref=46)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control-WO", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Regarding wet root mass in milligrams, isolate BCW200556 does not exhibit a mean estimate with a CI that overlaps with those of mean estimates from both controls. This implies the effect is significant at the alpha = 0.1 level.
+
+### 1.4. Wet Shoot Weight
+```{r, fig.width=10}
+# linear model of Wet shoot data
+lm_set_1_WS <- lm(mg ~ 1 + isolate, set_1_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_1_WS, which = c(2,3))
+par(op)
+```
+
+#### 1.4. - Anova
+
+```{r}
+anova(lm_set_1_WS)
+summary(lm_set_1_WS)
+```
+
+#### 1.4. - LSMeans (Control_W)
+
+```{r}
+lsm_s1.dun.WS <- summary(lsmeans(lm_set_1_WS, trt.vs.ctrl ~isolate, ref=46)$contrasts, infer = c(T,T))
+write.csv(lsm_s1.dun.WS, "./lsmeans_summary_tables/lsm_s1.dun.WS.csv")
+```
+
+#### 1.4. - LSMeans (Control-WO)
+
+```{r}
+summary(lsmeans(lm_set_1_WS, trt.vs.ctrl ~isolate, ref=47)$contrasts, infer = c(T,T))
+```
+
+#### 1.4 - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_1_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_1_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 1.4. - CLD - Mean Estimate Differences to Control_W
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control_W).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_WS, trt.vs.ctrl~isolate,ref=45)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control_W", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+#### 1.4. - CLD - Mean Estimate Differences to Control-WO
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control (Control-WO).
+
+```{r}
+plot(CLD(lsmeans(lm_set_1_WS, trt.vs.ctrl~isolate,ref=46)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control-WO", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> None of the mean estimates for inoculated isolates have non-overlapping confidence intervals with those of non-inoculated controls.
+
+## Batch 2.1
+
+```{r}
+# analyze set 2.1 data
+str(set_2.1)
+
+#subset by sample type
+
+set_2.1_DR <- filter(set_2.1, sample == "DR")
+set_2.1_DS <- filter(set_2.1, sample == "DS")
+set_2.1_WR <- filter(set_2.1, sample == "WR")
+set_2.1_WS <- filter(set_2.1, sample == "WS")
+
+```
+
+**Experimental Design Table**
+
+| Structure | Factor | Type | # levels |
+|-----------|--------|------|----------|
+| Treatment | Isolate | Qualitative | 33 |
+| Design    | MS Media Slants | Experimental Unit | 99 |
+| Response  | Plant Tissue Weight | Observational Unit | 396 |
+|Response | Dry Root Weight (DR) | Variable | 99 | 
+| Response | Dry Shoot Weight (DS) | Variable | 99 |
+| Response | Wet Root Weight (WR) | Variable | 99 | 
+| Response | Wet Shoot Weight (WS) | Variable | 99 |
+
+
+* Four sets of inoculations were setup independently, each with independent controls.
+* Each set of isolates was treated as an independent experiment for the analysis.
+
+### 2.1.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_2.1_DR <- lm(mg ~ 1 + isolate, set_2.1_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.1_DR, which = c(2,3))
+par(op)
+```
+
+#### 2.1.1. - Anova
+
+```{r}
+# assess variance - but the data isn't normal
+anova(lm_set_2.1_DR)
+```
+
+#### 2.1.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.1.dun.DR <- summary(lsmeans(lm_set_2.1_DR, trt.vs.ctrl ~isolate, ref=31)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.1.dun.DR, "./lsmeans_summary_tables/lsm_s2.1.dun.DR.csv")
+```
+
+#### 2.1.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.1_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.1_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.1.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.1_DR, trt.vs.ctrl~isolate,ref=31)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Dry root data suggests that isolate BCW201884 significantly increases root weight of the potato plantlets. I am suspecious of this result and need to check the manually recorded datasheets. The data entered for this isolate could have received a typo during data entry (likely based on the triplicate set entered: 3.6, 87.3, 1.7).
+
+### 2.1.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_2.1_DS <- lm(mg ~ 1 + isolate, set_2.1_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.1_DS, which = c(2,3))
+par(op)
+```
+
+#### 2.1.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.1_DS)
+```
+
+#### 2.1.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.1.dun.DS <- summary(lsmeans(lm_set_2.1_DS, trt.vs.ctrl ~isolate, ref=31)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.1.dun.DS, "./lsmeans_summary_tables/lsm_s2.1.dun.DS.csv")
+```
+
+#### 2.1.2 - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.1_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.1_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.1.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.1_DS, trt.vs.ctrl~isolate,ref=31)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> The difference between the control and BCW200810 is statistically significant at an alpha level of 0.1.
+
+### 2.1.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_2.1_WR <- lm(mg ~ 1 + isolate, set_2.1_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.1_WR, which = c(2,3))
+par(op)
+```
+
+#### 2.1.3. - Anova
+
+```{r}
+
+#assess variance
+anova(lm_set_2.1_WR)
+```
+
+#### 2.1.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.1.dun.WR <- summary(lsmeans(lm_set_2.1_WR, trt.vs.ctrl ~isolate, ref=31)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.1.dun.WR, "./lsmeans_summary_tables/lsm_s2.1.dun.WR.csv")
+```
+
+#### 2.1.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.1_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.1_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.1.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.1_WR, trt.vs.ctrl~isolate,ref=31)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Based on the modeling and the plot of mean wet root weights, the cluster of four isolates with mean wet root differences around 60 mg appear to be strong candidates. Isolates BCW201873, BCW200810, BCW201809, BCW201864.
+
+### 2.1.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_2.1_WS <- lm(mg ~ 1 + isolate, set_2.1_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.1_WS, which = c(2,3))
+par(op)
+```
+
+#### 2.1.4. - Anova
+
+```{r}
+
+# assess variance
+anova(lm_set_2.1_WS)
+```
+
+#### 2.1.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.1.dun.WS <- summary(lsmeans(lm_set_2.1_WS, trt.vs.ctrl ~isolate, ref=31)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.1.dun.WS, "./lsmeans_summary_tables/lsm_s2.1.dun.WS.csv")
+```
+
+#### 2.1.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.1_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.1_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.1.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.1_DS, trt.vs.ctrl~isolate,ref=31)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> The mean wet shoot weight for BCW200810 is significantly different from that of the control at an alpha level of 0.1
+
+## Batch 2.2
+
+```{r}
+# analyze set 2.2 data
+str(set_2.2)
+
+#subset by sample type
+
+set_2.2_DR <- filter(set_2.2, sample == "DR")
+set_2.2_DS <- filter(set_2.2, sample == "DS")
+set_2.2_WR <- filter(set_2.2, sample == "WR")
+set_2.2_WS <- filter(set_2.2, sample == "WS")
+```
+
+**Experimental Design Table**
+
+| Structure | Factor | Type | # levels |
+|-----------|--------|------|----------|
+| Treatment | Isolate | Qualitative | 33 |
+| Design    | MS Media Slants | Experimental Unit | 99 |
+| Response  | Plant Tissue Weight | Observational Unit | 396 |
+|Response | Dry Root Weight (DR) | Variable | 99 | 
+| Response | Dry Shoot Weight (DS) | Variable | 99 |
+| Response | Wet Root Weight (WR) | Variable | 99 | 
+| Response | Wet Shoot Weight (WS) | Variable | 99 |
+
+### 2.2.1. Dry Root Weight 
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_2.2_DR <- lm(mg ~ 1 + isolate, set_2.2_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.2_DR, which = c(2,3))
+par(op)
+```
+
+#### 2.2.1. - Anova
+
+```{r}
+# assess variance - but the data isn't normal
+anova(lm_set_2.2_DR)
+```
+
+#### 2.2.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.2.dun.DR <- summary(lsmeans(lm_set_2.2_DR, trt.vs.ctrl ~isolate, ref=32)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.2.dun.DR, "./lsmeans_summary_tables/lsm_s2.2.dun.DR.csv")
+```
+
+#### 2.2.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.2_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.2_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.2.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.2_DR, trt.vs.ctrl~isolate,ref=32)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201849 has a dry root weight that is significantly higher than the control.
+
+### 2.2.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_2.2_DS <- lm(mg ~ 1 + isolate, set_2.2_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.2_DS, which = c(2,3))
+par(op)
+```
+
+#### 2.2.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.2_DS)
+```
+
+#### 2.2.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.2.dun.DS <- summary(lsmeans(lm_set_2.2_DS, trt.vs.ctrl ~isolate, ref=32)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.2.dun.DS, "./lsmeans_summary_tables/lsm_s2.2.dun.DS.csv")
+```
+
+#### 2.2.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.2_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.2_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.2.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.2_DS, trt.vs.ctrl~isolate,ref=32)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201849 also has a mean dry shoot weight that is statistically significant from that of the control at an alpha level of 0.1.
+
+### 2.2.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_2.2_WR <- lm(mg ~ 1 + isolate, set_2.2_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.2_WR, which = c(2,3))
+par(op)
+```
+
+#### 2.2.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.2_WR)
+```
+
+#### 2.2.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.2.dun.WR <- summary(lsmeans(lm_set_2.2_WR, trt.vs.ctrl ~isolate, ref=32)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.2.dun.WR, "./lsmeans_summary_tables/lsm_s2.2.dun.WR.csv")
+```
+
+#### 2.2.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.2_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.2_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.2.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.2_WR, trt.vs.ctrl~isolate,ref=31)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> None of the isolates have non-overlapping confidence intervals for their wet root weight mean esimates.
+
+### 2.2.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_2.2_WS <- lm(mg ~ 1 + isolate, set_2.2_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.2_WS, which = c(2,3))
+par(op)
+```
+
+#### 2.2.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.2_WS)
+```
+
+#### 2.2.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.2.dun.WS <- summary(lsmeans(lm_set_2.2_WS, trt.vs.ctrl ~isolate, ref=32)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.2.dun.WS, "./lsmeans_summary_tables/lsm_s2.2.dun.WS.csv")
+```
+
+#### 2.2.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.2_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.2_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.2.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.2_WS, trt.vs.ctrl~isolate,ref=32)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201849 has a mean wet shoot weight that is statistically significant from that of the control at an alpha level of 0.1
+
+## Batch 2.3
+
+```{r}
+# analyze set 2.3 data
+str(set_2.3)
+
+#subset by sample type
+
+set_2.3_DR <- filter(set_2.3, sample == "DR")
+set_2.3_DS <- filter(set_2.3, sample == "DS")
+set_2.3_WR <- filter(set_2.3, sample == "WR")
+set_2.3_WS <- filter(set_2.3, sample == "WS")
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 29 |
+  | Design    | MS Media Slants | Experimental Unit | 87 |
+  | Response  | Plant Tissue Weight | Observational Unit | 348 |
+  |Response | Dry Root Weight (DR) | Variable | 87 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 87 |
+  | Response | Wet Root Weight (WR) | Variable | 87 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 87 |
+
+### 2.3.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_2.3_DR <- lm(mg ~ 1 + isolate, set_2.3_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.3_DR, which = c(2,3))
+par(op)
+```
+
+#### 2.3.1. - Anova
+
+```{r}
+# assess variance 
+anova(lm_set_2.3_DR)
+```
+
+> There appears to be no significant differences among the fitted values based on the anova.
+
+#### 2.3.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.3.dun.DR <- summary(lsmeans(lm_set_2.3_DR, trt.vs.ctrl ~isolate, ref=26)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.3.dun.DR, "./lsmeans_summary_tables/lsm_s2.3.dun.DR.csv")
+```
+
+#### 2.3.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.3_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.3_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.3.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.3_DR, trt.vs.ctrl~isolate,ref=26)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201881 has a higher mean estimate for dry root weight than the control with non-overlapping confidence intervals.
+
+### 2.3.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_2.3_DS <- lm(mg ~ 1 + isolate, set_2.3_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.3_DS, which = c(2,3))
+par(op)
+```
+
+#### 2.3.2. - Anova
+```{r}
+# assess variance
+anova(lm_set_2.3_DS)
+```
+
+#### 2.3.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.3.dun.DS <- summary(lsmeans(lm_set_2.3_DS, trt.vs.ctrl ~isolate, ref=26)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.3.dun.DS, "./lsmeans_summary_tables/lsm_s2.3.dun.DS.csv")
+```
+
+#### 2.3.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.3_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.3_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.3.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.3_DS, trt.vs.ctrl~isolate,ref=26)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> All of the isolates have means with confidence intervals that overlap with that of the control for set 2.3
+
+### 2.3.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_2.3_WR <- lm(mg ~ 1 + isolate, set_2.3_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.3_WR, which = c(2,3))
+par(op)
+```
+
+#### 2.3.3 - Anova
+
+```{r}
+
+# assess variance
+anova(lm_set_2.3_WR)
+```
+
+#### 2.3.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.3.dun.WR <- summary(lsmeans(lm_set_2.3_WR, trt.vs.ctrl ~isolate, ref=26)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.3.dun.WR, "./lsmeans_summary_tables/lsm_s2.3.dun.WR.csv")
+```
+
+#### 2.3.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.3_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.3_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.3.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.3_WR, trt.vs.ctrl~isolate,ref=26)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+
+> Wet Root data shows all isolate mean estimates have Confidence Intervals that overlap.
+
+### 2.3.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of Wet shoot data
+lm_set_2.3_WS <- lm(mg ~ 1 + isolate, set_2.3_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.3_WS, which = c(2,3))
+par(op)
+```
+
+#### 2.3.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.3_WS)
+```
+
+> Anova shows similar result to dry shoot.
+
+#### 2.3.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.3.dun.WS <- summary(lsmeans(lm_set_2.3_WS, trt.vs.ctrl ~isolate, ref=26)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.3.dun.WS, "./lsmeans_summary_tables/lsm_s2.3.dun.WS.csv")
+```
+
+#### 2.3.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.3_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.3_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.3.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.3_DS, trt.vs.ctrl~isolate,ref=26)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> All isolates means and CI's overlap with the control.
+
+## Batch 2.4
+
+```{r}
+# analyze set 2.4 data
+str(set_2.4)
+
+#subset by sample type
+
+set_2.4_DR <- filter(set_2.4, sample == "DR")
+set_2.4_DS <- filter(set_2.4, sample == "DS")
+set_2.4_WR <- filter(set_2.4, sample == "WR")
+set_2.4_WS <- filter(set_2.4, sample == "WS")
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 37 |
+  | Design    | MS Media Slants | Experimental Unit | 111 |
+  | Response  | Plant Tissue Weight | Observational Unit | 444 |
+  |Response | Dry Root Weight (DR) | Variable | 111 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 111 |
+  | Response | Wet Root Weight (WR) | Variable | 111 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 111 |
+
+### 2.4.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data for set 2.4
+lm_set_2.4_DR <- lm(mg ~ 1 + isolate, set_2.4_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.4_DR, which = c(2,3))
+par(op)
+```
+
+#### 2.4.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.4_DR)
+```
+
+#### 2.4.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.4.dun.DR <- summary(lsmeans(lm_set_2.4_DR, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.4.dun.DR, "./lsmeans_summary_tables/lsm_s2.4.dun.DR.csv")
+```
+
+#### 2.4.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.4_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.4_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.4.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.4_DR, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201900 has a mean dry root weight with non-overlapping confidence intervals relative to those of the control, when compared at an alpha level of 0.1. The mean of 8.63 mg is nearly three times higher than that of the control, which is 3.0 mg.
+
+### 2.4.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data from set 2.4
+lm_set_2.4_DS <- lm(mg ~ 1 + isolate, set_2.4_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.4_DS, which = c(2,3))
+par(op)
+```
+
+#### 2.4.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.4_DS)
+```
+
+#### 2.4.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.4.dun.DS <- summary(lsmeans(lm_set_2.4_DS, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.4.dun.DS, "./lsmeans_summary_tables/lsm_s2.4.dun.DS.csv")
+```
+
+#### 2.4.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.4_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.4_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.4.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.4_DS, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201814 and BCW201900 both have means with confidence intervals that do not overlap with the mean of the control for isolate set 2.4 (at an alpha level of 0.1)
+
+### 2.4.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of Wet Root data from set 2.4
+lm_set_2.4_WR <- lm(mg ~ 1 + isolate, set_2.4_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.4_WR, which = c(2,3))
+par(op)
+```
+
+#### 2.4.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.4_WR)
+```
+
+#### 2.4.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.4.dun.WR <- summary(lsmeans(lm_set_2.4_WR, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.4.dun.WR, "./lsmeans_summary_tables/lsm_s2.4.dun.WR.csv")
+```
+
+#### 2.4.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.4_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.4_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.4.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.4_WR, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201900 wet root mean and associated CI do not overlap with those of the control, and the mean is three times that of the control.
+
+### 2.4.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of Wet Shoot data from set 2.4
+lm_set_2.4_WS <- lm(mg ~ 1 + isolate, set_2.4_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_2.4_WS, which = c(2,3))
+par(op)
+```
+
+#### 2.4.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_2.4_WS)
+```
+
+#### 2.4.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s2.4.dun.WS <- summary(lsmeans(lm_set_2.4_WS, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s2.4.dun.WS, "./lsmeans_summary_tables/lsm_s2.4.dun.WS.csv")
+```
+
+#### 2.4.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_2.4_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_2.4_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 2.4.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_2.4_WS, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+
+> BCW201900 and BCW201814 are the only isolates that have mean wet shoot weight estimates with confidence intervals that do not overlap with those of the control.
+
+## Batch 3.1
+
+```{r}
+# analyze set 3.1 data
+str(set_3.1)
+
+#subset by sample type
+
+set_3.1_DR <- filter(set_3.1, sample == "DR")
+set_3.1_DS <- filter(set_3.1, sample == "DS")
+set_3.1_WR <- filter(set_3.1, sample == "WR")
+set_3.1_WS <- filter(set_3.1, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 38 |
+  | Design    | MS Media Slants | Experimental Unit | 114 |
+  | Response  | Plant Tissue Weight | Observational Unit | 456 |
+  |Response | Dry Root Weight (DR) | Variable | 114 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 114 |
+  | Response | Wet Root Weight (WR) | Variable | 114 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 114 |
+
+### 3.1.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_3.1_DR <- lm(mg ~ 1 + isolate, set_3.1_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.1_DR, which = c(2,3))
+par(op)
+```
+
+#### 3.1.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.1_DR)
+```
+
+#### 3.1.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.1.dun.DR <- summary(lsmeans(lm_set_3.1_DR, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.1.dun.DR, "./lsmeans_summary_tables/lsm_s3.1.dun.DR.csv")
+```
+
+#### 3.1.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.1_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.1_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.1.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.1_DR, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201088 has a mean dry root weight estimate with confidence intervals that do not overlap with the control, but the lower CL of 201088 is very close to the upper CL of the control estimate.
+
+### 3.1.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_3.1_DS <- lm(mg ~ 1 + isolate, set_3.1_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.1_DS, which = c(2,3))
+par(op)
+```
+
+#### 3.1.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.1_DS)
+```
+
+#### 3.1.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.1.dun.DS <- summary(lsmeans(lm_set_3.1_DS, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.1.dun.DS, "./lsmeans_summary_tables/lsm_s3.1.dun.DS.csv")
+```
+
+#### 3.1.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.1_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.1_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.1.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.1_DS, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201914 has a mean dry shoot weight that is nearly three times that of the control and the confidence intervals between the two do not overlap at an alpha level of 0.1.
+
+### 3.1.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_3.1_WR <- lm(mg ~ 1 + isolate, set_3.1_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.1_WR, which = c(2,3))
+par(op)
+```
+
+#### 3.1.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.1_WR)
+```
+
+#### 3.1.3. - LSMeans - Dunnett
+
+```{r}
+summary(lsmeans(lm_set_3.1_WR, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+```
+
+#### 3.1.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.1_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.1_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.1.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.1_WR, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> The results for the wet root data agree with those of the dry root data.
+
+### 3.1.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_3.1_WS <- lm(mg ~ 1 + isolate, set_3.1_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.1_WS, which = c(2,3))
+par(op)
+```
+
+#### 3.1.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.1_WS)
+```
+
+
+#### 3.1.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.1.dun.WS <- summary(lsmeans(lm_set_3.1_WS, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.1.dun.WS, "./lsmeans_summary_tables/lsm_s3.1.dun.WS.csv")
+```
+
+#### 3.1.4. - CLD
+
+```{r}
+CLD(lsmeans(lm_set_3.1_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.1_WS, ~isolate), alpha=0.1), main="Set 3.1: All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+> Confidence intervals overlap between isolates with largest mean differences to the control.
+
+## Batch 3.2
+```{r}
+# analyze set 3.2 data
+str(set_3.2)
+
+#subset by sample type
+set_3.2_DR <- filter(set_3.2, sample == "DR")
+set_3.2_DS <- filter(set_3.2, sample == "DS")
+set_3.2_WR <- filter(set_3.2, sample == "WR")
+set_3.2_WS <- filter(set_3.2, sample == "WS")
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 26 |
+  | Design    | MS Media Slants | Experimental Unit | 78 |
+  | Response  | Plant Tissue Weight | Observational Unit | 312 |
+  |Response | Dry Root Weight (DR) | Variable | 78 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 78 |
+  | Response | Wet Root Weight (WR) | Variable | 78 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 78 |
+
+### 3.2.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_3.2_DR <- lm(mg ~ 1 + isolate, set_3.2_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.2_DR, which = c(2,3))
+par(op)
+```
+
+#### 3.2.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.2_DR)
+```
+
+#### 3.2.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.2.dun.DR <- summary(lsmeans(lm_set_3.2_DR, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.2.dun.DR, "./lsmeans_summary_tables/lsm_s3.2.dun.DR.csv")
+```
+
+#### 3.2.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.2_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.2_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.2.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.2_DR, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are no significantly different means estimates
+
+### 3.2.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_3.2_DS <- lm(mg ~ 1 + isolate, set_3.2_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.2_DS, which = c(2,3))
+par(op)
+```
+
+#### 3.2.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.2_DS)
+```
+
+#### 3.2.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.2.dun.DS <- summary(lsmeans(lm_set_3.2_DS, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.2.dun.DS, "./lsmeans_summary_tables/lsm_s3.2.dun.DS.csv")
+```
+
+#### 3.2.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.2_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.2_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.2.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.2_DS, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are no significantly different means estimates for Dry Shoot weight in Batch 3.2.
+
+### 3.2.3. Wet Root Data
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_3.2_WR <- lm(mg ~ 1 + isolate, set_3.2_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.2_WR, which = c(2,3))
+par(op)
+```
+
+#### 3.2.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.2_WR)
+```
+
+#### 3.2.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.2.dun.WR <- summary(lsmeans(lm_set_3.2_WR, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.2.dun.WR, "./lsmeans_summary_tables/lsm_s3.2.dun.WR.csv")
+```
+
+#### 3.2.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.2_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.2_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.2.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.2_WR, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are no significantly different means estimates for wet root weight in batch 3.2.
+
+### 3.2.4. Wet Shoot Data
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_3.2_WS <- lm(mg ~ 1 + isolate, set_3.2_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.2_WS, which = c(2,3))
+par(op)
+```
+
+#### 3.2.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.2_WS)
+```
+
+#### 3.2.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.2.dun.WS <- summary(lsmeans(lm_set_3.2_WS, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.2.dun.WS, "./lsmeans_summary_tables/lsm_s3.2.dun.WS.csv")
+```
+
+#### 3.2.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.2_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.2_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.2.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.2_WS, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are no significantly different means estimates. Control is the highest mean, all inoculated platlets exhibited lower mean wet shoot weight.
+
+## Batch 3.3
+
+```{r}
+# analyze set 3.3 data
+str(set_3.3)
+
+#subset by sample type
+
+set_3.3_DR <- filter(set_3.3, sample == "DR")
+set_3.3_DS <- filter(set_3.3, sample == "DS")
+set_3.3_WR <- filter(set_3.3, sample == "WR")
+set_3.3_WS <- filter(set_3.3, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 38 |
+  | Design    | MS Media Slants | Experimental Unit | 114 |
+  | Response  | Plant Tissue Weight | Observational Unit | 456 |
+  |Response | Dry Root Weight (DR) | Variable | 114 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 114 |
+  | Response | Wet Root Weight (WR) | Variable | 114 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 114 |
+
+### 3.3.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_3.3_DR <- lm(mg ~ 1 + isolate, set_3.3_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.3_DR, which = c(2,3))
+par(op)
+```
+
+#### 3.3.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.3_DR)
+```
+
+#### 3.3.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.3.dun.DR <- summary(lsmeans(lm_set_3.3_DR, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.3.dun.DR, "./lsmeans_summary_tables/lsm_s3.3.dun.DR.csv")
+```
+
+#### 3.3.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.3_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.3_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.3.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.3_DR, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Here, the control mean is much higher than most of the inoculated samples.
+
+### 3.3.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_3.3_DS <- lm(mg ~ 1 + isolate, set_3.3_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.3_DS, which = c(2,3))
+par(op)
+```
+
+#### 3.3.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.3_DS)
+```
+
+#### 3.3.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.3.dun.DS <- summary(lsmeans(lm_set_3.3_DS, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.3.dun.DS, "./lsmeans_summary_tables/lsm_s3.3.dun.DS.csv")
+```
+
+#### 3.3.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.3_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.3_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.3.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.3_DS, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Again, we have negative differences in mean weight relative to the control.
+
+### 3.3.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_3.3_WR <- lm(mg ~ 1 + isolate, set_3.3_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.3_WR, which = c(2,3))
+par(op)
+```
+
+#### 3.3.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.3_WR)
+```
+
+#### 3.3.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.3.dun.WR <- summary(lsmeans(lm_set_3.3_WR, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.3.dun.WR, "./lsmeans_summary_tables/lsm_s3.3.dun.WR.csv")
+```
+
+#### 3.3.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.3_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.3_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.3.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.3_WR, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Effect of data distribution, or control is bad, or the isolates hinder growth?
+
+### 3.3.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_3.3_WS <- lm(mg ~ 1 + isolate, set_3.3_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.3_WS, which = c(2,3))
+par(op)
+```
+
+#### 3.3.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.3_WS)
+```
+
+#### 3.3.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.3.dun.WS <- summary(lsmeans(lm_set_3.3_WS, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.3.dun.WS, "./lsmeans_summary_tables/lsm_s3.3.dun.WS.csv")
+```
+
+#### 3.3.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.3_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.3_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.3.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.3_WS, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> The control mean weight is much higher than inoculated plant mean weights for wet shoot.
+
+## Batch 3.4
+
+```{r}
+# analyze set 3.4 data
+str(set_3.4)
+
+#subset by sample type
+
+set_3.4_DR <- filter(set_3.4, sample == "DR")
+set_3.4_DS <- filter(set_3.4, sample == "DS")
+set_3.4_WR <- filter(set_3.4, sample == "WR")
+set_3.4_WS <- filter(set_3.4, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 38 |
+  | Design    | MS Media Slants | Experimental Unit | 114 |
+  | Response  | Plant Tissue Weight | Observational Unit | 456 |
+  |Response | Dry Root Weight (DR) | Variable | 114 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 114 |
+  | Response | Wet Root Weight (WR) | Variable | 114 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 114 |
+
+### 3.4.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_3.4_DR <- lm(mg ~ 1 + isolate, set_3.4_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.4_DR, which = c(2,3))
+par(op)
+```
+
+#### 3.4.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.4_DR)
+```
+
+#### 3.4.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.4.dun.DR <- summary(lsmeans(lm_set_3.4_DR, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.4.dun.DR, "./lsmeans_summary_tables/lsm_s3.4.dun.DR.csv")
+```
+
+#### 3.4.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.4_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.4_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.4.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.4_DR, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are not significant positive differences between mean estimates for inoculated plants and the control plants with respect to dry root weight measurements in batch 3.4.
+
+### 3.4.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_3.4_DS <- lm(mg ~ 1 + isolate, set_3.4_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.4_DS, which = c(2,3))
+par(op)
+```
+
+#### 3.4.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.4_DS)
+```
+
+#### 3.4.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.4.dun.DS <- summary(lsmeans(lm_set_3.4_DS, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.4.dun.DS, "./lsmeans_summary_tables/lsm_s3.4.dun.DS.csv")
+```
+
+#### 3.4.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.4_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.4_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.4.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.4_DS, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> All isolates have mean estimates for dry shoot mass with confidence intervals that overlap with those of the control group.
+
+### 3.4.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_3.4_WR <- lm(mg ~ 1 + isolate, set_3.4_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.4_WR, which = c(2,3))
+par(op)
+```
+
+#### 3.4.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.4_WR)
+```
+
+#### 3.4.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.4.dun.WR <- summary(lsmeans(lm_set_3.4_WR, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.4.dun.WR, "./lsmeans_summary_tables/lsm_s3.4.dun.WR.csv")
+```
+
+#### 3.4.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.4_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.4_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.4.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.4_WR, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant effect of inoculation treatment on mean wet root weight for batch 3.4 was observed.
+
+### 3.4.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_3.4_WS <- lm(mg ~ 1 + isolate, set_3.4_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.4_WS, which = c(2,3))
+par(op)
+```
+
+#### 3.4.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.4_WS)
+```
+
+#### 3.4.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.4.dun.WS <- summary(lsmeans(lm_set_3.4_WS, trt.vs.ctrl ~isolate, ref=36)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.4.dun.WS, "./lsmeans_summary_tables/lsm_s3.4.dun.WS.csv")
+```
+
+#### 3.4.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.4_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.4_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.4.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.4_WS, trt.vs.ctrl~isolate,ref=36)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant effect of inoculation treatment on mean wet shoot weight for batch 3.4 was observed. Confidence intervals for mean estimates of isolates that produced positive weight differences relative to the control are highly overlapping.
+
+## Batch 3.5
+
+```{r}
+# analyze set 3.5 data
+str(set_3.5)
+
+#subset by sample type
+
+set_3.5_DR <- filter(set_3.5, sample == "DR")
+set_3.5_DS <- filter(set_3.5, sample == "DS")
+set_3.5_WR <- filter(set_3.5, sample == "WR")
+set_3.5_WS <- filter(set_3.5, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 26 |
+  | Design    | MS Media Slants | Experimental Unit | 78 |
+  | Response  | Plant Tissue Weight | Observational Unit | 312 |
+  |Response | Dry Root Weight (DR) | Variable | 78 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 78 |
+  | Response | Wet Root Weight (WR) | Variable | 78 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 78 |
+
+### 3.5.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_3.5_DR <- lm(mg ~ 1 + isolate, set_3.5_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.5_DR, which = c(2,3))
+par(op)
+```
+
+#### 3.5.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.5_DR)
+```
+
+#### 3.5.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.5.dun.DR <- summary(lsmeans(lm_set_3.5_DR, trt.vs.ctrl ~isolate, ref=22)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.5.dun.DR, "./lsmeans_summary_tables/lsm_s3.5.dun.DR.csv")
+```
+
+#### 3.5.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.5_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.5_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.5.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.5_DR, trt.vs.ctrl~isolate,ref=22)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant effect.
+
+### 3.5.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_3.5_DS <- lm(mg ~ 1 + isolate, set_3.5_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.5_DS, which = c(2,3))
+par(op)
+```
+
+#### 3.5.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.5_DS)
+```
+
+#### 3.5.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.5.dun.DS <- summary(lsmeans(lm_set_3.5_DS, trt.vs.ctrl ~isolate, ref=22)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.5.dun.DS, "./lsmeans_summary_tables/lsm_s3.5.dun.DS.csv")
+```
+
+#### 3.5.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.5_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.5_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.5.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.5_DS, trt.vs.ctrl~isolate,ref=22)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant positive effects were observed for mean dry shoot weight in batch 3.5.
+
+### 3.5.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_3.5_WR <- lm(mg ~ 1 + isolate, set_3.5_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.5_WR, which = c(2,3))
+par(op)
+```
+
+#### 3.5.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.5_WR)
+```
+
+#### 3.5.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.5.dun.WR <- summary(lsmeans(lm_set_3.5_WR, trt.vs.ctrl ~isolate, ref=22)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.5.dun.WR, "./lsmeans_summary_tables/lsm_s3.5.dun.WR.csv")
+```
+
+#### 3.5.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.5_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.5_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.5.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.5_WR, trt.vs.ctrl~isolate,ref=22)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant positive effects observed for wet root weight of batch 3.5.
+
+### 3.5.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_3.5_WS <- lm(mg ~ 1 + isolate, set_3.5_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_3.5_WS, which = c(2,3))
+par(op)
+```
+
+#### 3.5.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_3.5_WS)
+```
+
+#### 3.5.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s3.5.dun.WS <- summary(lsmeans(lm_set_3.5_WS, trt.vs.ctrl ~isolate, ref=22)$contrasts, infer = c(T,T))
+write.csv(lsm_s3.5.dun.WS, "./lsmeans_summary_tables/lsm_s3.5.dun.WS.csv")
+```
+
+#### 3.5.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_3.5_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_3.5_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 3.5.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_3.5_WS, trt.vs.ctrl~isolate,ref=22)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant positive effect was observed for Wet Shoot weight in batch 3.5 inoculations.
+
+## Batch 4.1
+
+```{r}
+# analyze set 4.1 data
+str(set_4.1)
+
+#subset by sample type
+
+set_4.1_DR <- filter(set_4.1, sample == "DR")
+set_4.1_DS <- filter(set_4.1, sample == "DS")
+set_4.1_WR <- filter(set_4.1, sample == "WR")
+set_4.1_WS <- filter(set_4.1, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 39 |
+  | Design    | MS Media Slants | Experimental Unit | 117 |
+  | Response  | Plant Tissue Weight | Observational Unit | 468 |
+  |Response | Dry Root Weight (DR) | Variable | 117 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 117 |
+  | Response | Wet Root Weight (WR) | Variable | 117 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 117 |
+  
+### 4.1.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_4.1_DR <- lm(mg ~ 1 + isolate, set_4.1_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.1_DR, which = c(2,3))
+par(op)
+```
+
+#### 4.1.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.1_DR)
+```
+
+#### 4.1.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.1.dun.DR <- summary(lsmeans(lm_set_4.1_DR, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.1.dun.DR, "./lsmeans_summary_tables/lsm_s4.1.dun.DR.csv")
+```
+
+#### 4.1.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.1_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.1_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.1.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.1_DR, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant positive effect observed for inoculum treatment based on dry root measurements of batch 4.1.
+
+### 4.1.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_4.1_DS <- lm(mg ~ 1 + isolate, set_4.1_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.1_DS, which = c(2,3))
+par(op)
+```
+
+#### 4.1.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.1_DS)
+```
+
+#### 4.1.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.1.dun.DS <- summary(lsmeans(lm_set_4.1_DS, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.1.dun.DS, "./lsmeans_summary_tables/lsm_s4.1.dun.DS.csv")
+```
+
+#### 4.1.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.1_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.1_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.1.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.1_DS, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are no significant positive effects observed based on measurements of dry shoot weight for plants inoculated with isolates in batch 4.1.
+
+### 4.1.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_4.1_WR <- lm(mg ~ 1 + isolate, set_4.1_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.1_WR, which = c(2,3))
+par(op)
+```
+
+#### 4.1.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.1_WR)
+```
+
+#### 4.1.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.1.dun.WR <- summary(lsmeans(lm_set_4.1_WR, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.1.dun.WR, "./lsmeans_summary_tables/lsm_s4.1.dun.WR.csv")
+```
+
+#### 4.1.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.1_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.1_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.1.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.1_WR, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Control is the highest mean estimate. All significant effects are negative on mean wet root weight.
+
+### 4.1.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_4.1_WS <- lm(mg ~ 1 + isolate, set_4.1_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.1_WS, which = c(2,3))
+par(op)
+```
+
+#### 4.1.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.1_WS)
+```
+
+#### 4.1.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.1.dun.WS <- summary(lsmeans(lm_set_4.1_WS, trt.vs.ctrl ~isolate, ref=37)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.1.dun.WS, "./lsmeans_summary_tables/lsm_s4.1.dun.WS.csv")
+```
+
+#### 4.1.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.1_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.1_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.1.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.1_WS, trt.vs.ctrl~isolate,ref=37)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> Highest mean producing isolate (BCW200984) has lower Confidence limit that overlaps with upper of control.
+
+## Batch 4.2
+
+```{r}
+# analyze set 4.2 data
+str(set_4.2)
+
+#subset by sample type
+
+set_4.2_DR <- filter(set_4.2, sample == "DR")
+set_4.2_DS <- filter(set_4.2, sample == "DS")
+set_4.2_WR <- filter(set_4.2, sample == "WR")
+set_4.2_WS <- filter(set_4.2, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 33 |
+  | Design    | MS Media Slants | Experimental Unit | 99 |
+  | Response  | Plant Tissue Weight | Observational Unit | 396 |
+  |Response | Dry Root Weight (DR) | Variable | 99 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 99 |
+  | Response | Wet Root Weight (WR) | Variable | 99 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 99 |
+
+### 4.2.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_4.2_DR <- lm(mg ~ 1 + isolate, set_4.2_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.2_DR, which = c(2,3))
+par(op)
+```
+
+#### 4.2.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.2_DR)
+```
+
+#### 4.2.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.2.dun.DR <- summary(lsmeans(lm_set_4.2_DR, trt.vs.ctrl ~isolate, ref=24)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.2.dun.DR, "./lsmeans_summary_tables/lsm_s4.2.dun.DR.csv")
+```
+
+#### 4.2.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.2_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.2_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.2.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.2_DR, trt.vs.ctrl~isolate,ref=24)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> BCW201815 and BCW201084 inoculated plants had higher mean dry root weights than the control, and the confidence intervals for these estimates do not overlap with those of the control mean.
+
+### 4.2.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_4.2_DS <- lm(mg ~ 1 + isolate, set_4.2_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.2_DS, which = c(2,3))
+par(op)
+```
+
+#### 4.2.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.2_DS)
+```
+
+#### 4.2.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.2.dun.DS <- summary(lsmeans(lm_set_4.2_DS, trt.vs.ctrl ~isolate, ref=24)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.2.dun.DS, "./lsmeans_summary_tables/lsm_s4.2.dun.DS.csv")
+```
+
+#### 4.2.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.2_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.2_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.2.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.2_DS, trt.vs.ctrl~isolate,ref=24)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant effect observed for dry shoot weight of batch 4.2 at an alpha level of 0.1, but `BCW201815` is very close to having non-overlapping CI for the mean estimate.
+
+### 4.2.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_4.2_WR <- lm(mg ~ 1 + isolate, set_4.2_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.2_WR, which = c(2,3))
+par(op)
+```
+
+#### 4.2.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.2_WR)
+```
+
+#### 4.2.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.2.dun.WR <- summary(lsmeans(lm_set_4.2_WR, trt.vs.ctrl ~isolate, ref=24)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.2.dun.WR, "./lsmeans_summary_tables/lsm_s4.2.dun.WR.csv")
+```
+
+#### 4.2.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.2_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.2_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.2.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.2_WR, trt.vs.ctrl~isolate,ref=24)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> `BCW201084` and `BCW201815` both have mean wet root weight estimates higher than the control and the confidence intervals for these two isolate's mean estimates do not overlap with those of the control.
+
+### 4.2.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_4.2_WS <- lm(mg ~ 1 + isolate, set_4.2_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.2_WS, which = c(2,3))
+par(op)
+```
+
+#### 4.2.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.2_WS)
+```
+
+#### 4.2.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.2.dun.WS <- summary(lsmeans(lm_set_4.2_WS, trt.vs.ctrl ~isolate, ref=24)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.2.dun.WS, "./lsmeans_summary_tables/lsm_s4.2.dun.WS.csv")
+```
+
+#### 4.2.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.2_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.2_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.2.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.2_WS, trt.vs.ctrl~isolate,ref=24)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> There are no positive effects observed based on measurements of wet shoot weight for plants inoculated with isolates in batch 4.2 that have non-overlapping confidence intervals with those of the control.
+
+## Batch 4.3.
+
+```{r}
+# analyze set 4.3 data
+str(set_4.3)
+
+#subset by sample type
+
+set_4.3_DR <- filter(set_4.3, sample == "DR")
+set_4.3_DS <- filter(set_4.3, sample == "DS")
+set_4.3_WR <- filter(set_4.3, sample == "WR")
+set_4.3_WS <- filter(set_4.3, sample == "WS")
+
+```
+
+**Experimental Design Table**
+  
+  | Structure | Factor | Type | # levels |
+  |-----------|--------|------|----------|
+  | Treatment | Isolate | Qualitative | 30 |
+  | Design    | MS Media Slants | Experimental Unit | 90 |
+  | Response  | Plant Tissue Weight | Observational Unit | 360 |
+  |Response | Dry Root Weight (DR) | Variable | 90 | 
+  | Response | Dry Shoot Weight (DS) | Variable | 90 |
+  | Response | Wet Root Weight (WR) | Variable | 90 | 
+  | Response | Wet Shoot Weight (WS) | Variable | 90 |
+
+### 4.3.1. Dry Root Weight
+
+```{r, fig.width=10}
+# linear model of dry root data
+lm_set_4.3_DR <- lm(mg ~ 1 + isolate, set_4.3_DR)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.3_DR, which = c(2,3))
+par(op)
+```
+
+#### 4.3.1. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.3_DR)
+```
+
+#### 4.3.1. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.3.dun.DR <- summary(lsmeans(lm_set_4.3_DR, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.3.dun.DR, "./lsmeans_summary_tables/lsm_s4.3.dun.DR.csv")
+```
+
+#### 4.3.1. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.3_DR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.3_DR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.3.1. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.3_DR, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Dry Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant effect observed for dry root measurements in batch 4.3.
+
+### 4.3.2. Dry Shoot Weight
+
+```{r, fig.width=10}
+# linear model of dry shoot data
+lm_set_4.3_DS <- lm(mg ~ 1 + isolate, set_4.3_DS)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.3_DS, which = c(2,3))
+par(op)
+```
+
+#### 4.3.2. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.3_DS)
+```
+
+#### 4.3.2. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.3.dun.DS <- summary(lsmeans(lm_set_4.3_DS, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.3.dun.DS, "./lsmeans_summary_tables/lsm_s4.3.dun.DS.csv")
+```
+
+#### 4.3.2. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.3_DS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.3_DS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Dry Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.3.2. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Dry Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.3_DS, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Dry Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant effect observed for dry shoot measurements in batch 4.3.
+
+### 4.3.3. Wet Root Weight
+
+```{r, fig.width=10}
+# linear model of wet root data
+lm_set_4.3_WR <- lm(mg ~ 1 + isolate, set_4.3_WR)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.3_WR, which = c(2,3))
+par(op)
+```
+
+#### 4.3.3. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.3_WR)
+```
+
+#### 4.3.3. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.3.dun.WR <- summary(lsmeans(lm_set_4.3_WR, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.3.dun.WR, "./lsmeans_summary_tables/lsm_s4.3.dun.WR.csv")
+```
+
+#### 4.3.3. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.3_WR, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.3_WR, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Root Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.3.3. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Root Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.3_WR, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Wet Root Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant positive effect observed for wet root measurements in batch 4.3.
+
+### 4.3.4. Wet Shoot Weight
+
+```{r, fig.width=10}
+# linear model of wet shoot data
+lm_set_4.3_WS <- lm(mg ~ 1 + isolate, set_4.3_WS)
+op = par(mfrow=c(1,2))
+plot(lm_set_4.3_WS, which = c(2,3))
+par(op)
+```
+
+#### 4.3.4. - Anova
+
+```{r}
+# assess variance
+anova(lm_set_4.3_WS)
+```
+
+#### 4.3.4. - LSMeans - Dunnett
+
+```{r}
+lsm_s4.3.dun.WS <- summary(lsmeans(lm_set_4.3_WS, trt.vs.ctrl ~isolate, ref=25)$contrasts, infer = c(T,T))
+write.csv(lsm_s4.3.dun.WS, "./lsmeans_summary_tables/lsm_s4.3.dun.WS.csv")
+```
+
+#### 4.3.4. - CLD - (Pairwise by isolate)
+
+```{r}
+CLD(lsmeans(lm_set_4.3_WS, ~isolate), alpha=0.1)
+plot(CLD(lsmeans(lm_set_4.3_WS, ~isolate), alpha=0.1), main="All pairwise comparisons for Mean Wet Shoot Weight", xlab = "Mean Weight (mg)", ylab = "Isolate ID")
+```
+
+#### 4.3.4. - CLD - Mean Estimate Differences to Control
+
+Compact Letter Display of estimates for Wet Shoot Mean weight (mg) differences between plants that were inoculated with a mucilage isolates and the non-inoculated control.
+
+```{r}
+plot(CLD(lsmeans(lm_set_4.3_WS, trt.vs.ctrl~isolate,ref=25)$contrasts, alpha=0.1), main="Mean Wet Shoot Weight Differences of Inoculated Plants vs. Control", xlab = "Difference of Mean Estimates (mg)", ylab = "Contrasts")
+```
+
+> No significant positive effect observed for inoculation treatments on wet shoot measurements in batch 4.3.
+
+
+
+
+## Summary
+
+> The isolates below were each found to have statistically significant differences in mean weight for the specified response variables that were measured, where inclusion in the summary table was contingent upon the confidence intervals for the estimates being non-overlapping with those of the experimental control group (alpha level of 0.1 with correction for multiple testing).  
+
+| Isolate List | Batch | Response | Difference from Control (mg) |
+|--------------|-------|-----------|-----------------------------|
+| BCW201858    |  1    | Dry Root  |             9.70            |
+| BCW200727    |  1    | Dry Shoot |            21.08            |
+| BCW200556    |  1    | Wet Root  |            95.85            |
+| BCW200533    |  1    | Wet Root  |            93.01            |
+| BCW200810    |  2.1  | Dry Shoot |            21.75            |
+| BCW200810    |  2.1  | Wet Root  |            60.9             |
+| BCW201873    |  2.1  | Wet Root  |            70.43            |
+| BCW201809    |  2.1  | Wet Root  |            62.01            |
+| BCW201864    |  2.1  | Wet Root  |            65.43            |
+| BCW201849    |  2.2  | Dry Root  |             5.02            |
+| BCW201849    |  2.2  | Dry Shoot |            29.35            |
+| BCW201849    |  2.2  | Wet Shoot |           415.22            |
+| BCW201881    |  2.3  | Dry Root  |            11.94            |
+| BCW201900    |  2.4  | Dry Root  |            5.63             |
+| BCW201900    |  2.4  | Dry Shoot |            25.92            |
+| BCW201814    |  2.4  | Dry Shoot |            24.19            |
+| BCW201900    |  2.4  | Wet Root  |            79.7             |
+| BCW201814    |  2.4  | Wet Shoot |           248.28            |
+| BCW201900    |  2.4  | Wet Shoot |           397.05            |
+| BCW201088    |  3.1  | Dry Root  |             3.90            |
+| BCW201914    |  3.1  | Dry Shoot |            20.23            |
+| BCW201815    |  4.2  | Dry Root  |             2.67            |
+| BCW201084    |  4.2  | Dry Root  |             2.43            |
+| BCW201815    |  4.2  | Dry Shoot |            21.10            |
+| BCW201084    |  4.2  | Wet Root  |            28.90            |
+| BCW201815    |  4.2  | Wet Root  |            27.27            |
+
+**Total Number of isolates with statistically supported positive effects on mean weight:** 16
+**Note:** There are several isolates in the first batch that display the trend of highly increased plant biomass, either in shoots or roots, but the confidence intervals overlap with those of the controls based on linear modeling of the data.
+
+### N isolates in each batch
+```{r}
+str(set_1)
+unique(set_1$isolate)
+```
+

@@ -1,0 +1,3179 @@
+---
+title: "Potato Plantlet Inoculation Graphs"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(gridExtra)
+library(cowplot)
+```
+
+
+# Add Batch ID to Wet Weight Dataframes
+```{r}
+# add batch id variable to each dataset
+
+## Set 1
+### Wet Shoot
+set_1_WS_id <- set_1_WS
+set_1_WS_id$batch <- c("Set 1")
+
+### Wet Root
+set_1_WR_id <- set_1_WR
+set_1_WR_id$batch <- c("Set 1")
+
+## Set 2.1
+### Wet Shoot
+set_2.1_WS_id <- set_2.1_WS
+set_2.1_WS_id$batch <- c("Set 2.1")
+
+### Wet Root
+set_2.1_WR_id <- set_2.1_WR
+set_2.1_WR_id$batch <- c("Set 2.1")
+
+## Set 2.2
+### Wet Shoot
+set_2.2_WS_id <- set_2.2_WS
+set_2.2_WS_id$batch <- c("Set 2.2")
+
+### Wet Root
+set_2.2_WR_id <- set_2.2_WR
+set_2.2_WR_id$batch <- c("Set 2.2")
+
+## Set 2.3
+### Wet Shoot
+set_2.3_WS_id <- set_2.3_WS
+set_2.3_WS_id$batch <- c("Set 2.3")
+
+### Wet Root
+set_2.3_WR_id <- set_2.3_WR
+set_2.3_WR_id$batch <- c("Set 2.3")
+
+## Set 2.4
+### Wet Shoot
+set_2.4_WS_id <- set_2.4_WS
+set_2.4_WS_id$batch <- c("Set 2.4")
+
+### Wet Root
+set_2.4_WR_id <- set_2.4_WR
+set_2.4_WR_id$batch <- c("Set 2.4")
+
+## Set 3.1
+### Wet Shoot
+set_3.1_WS_id <- set_3.1_WS
+set_3.1_WS_id$batch <- c("Set 3.1")
+
+### Wet Root
+set_3.1_WR_id <- set_3.1_WR
+set_3.1_WR_id$batch <- c("Set 3.1")
+
+## Set 3.2
+### Wet Shoot
+set_3.2_WS_id <- set_3.2_WS
+set_3.2_WS_id$batch <- c("Set 3.2")
+
+### Wet Root
+set_3.2_WR_id <- set_3.2_WR
+set_3.2_WR_id$batch <- c("Set 3.2")
+
+## Set 3.3
+### Wet Shoot
+set_3.3_WS_id <- set_3.3_WS
+set_3.3_WS_id$batch <- c("Set 3.3")
+
+### Wet Root
+set_3.3_WR_id <- set_3.3_WR
+set_3.3_WR_id$batch <- c("Set 3.3")
+
+## Set 3.4
+### Wet Shoot
+set_3.4_WS_id <- set_3.4_WS
+set_3.4_WS_id$batch <- c("Set 3.4")
+
+### Wet Root
+set_3.4_WR_id <- set_3.4_WR
+set_3.4_WR_id$batch <- c("Set 3.4")
+
+## Set 3.5
+### Wet Shoot
+set_3.5_WS_id <- set_3.5_WS
+set_3.5_WS_id$batch <- c("Set 3.5")
+
+### Wet Root
+set_3.5_WR_id <- set_3.5_WR
+set_3.5_WR_id$batch <- c("Set 3.5")
+
+## Set 4.1
+### Wet Shoot
+set_4.1_WS_id <- set_4.1_WS
+set_4.1_WS_id$batch <- c("Set 4.1")
+
+### Wet Root
+set_4.1_WR_id <- set_4.1_WR
+set_4.1_WR_id$batch <- c("Set 4.1")
+
+## Set 4.2
+### Wet Shoot
+set_4.2_WS_id <- set_4.2_WS
+set_4.2_WS_id$batch <- c("Set 4.2")
+
+### Wet Root
+set_4.2_WR_id <- set_4.2_WR
+set_4.2_WR_id$batch <- c("Set 4.2")
+
+## Set 4.3
+### Wet Shoot
+set_4.3_WS_id <- set_4.3_WS
+set_4.3_WS_id$batch <- c("Set 4.3")
+
+### Wet Root
+set_4.3_WR_id <- set_4.3_WR
+set_4.3_WR_id$batch <- c("Set 4.3")
+```
+
+# Group the Data for Plotting
+```{r}
+#Group the datasets based on Sample ID and prep method
+
+## Set 1
+set_1_WS_grouped <- group_by(set_1_WS_id, isolate, sample, batch)
+set_1_WR_grouped <- group_by(set_1_WR_id, isolate, sample, batch)
+
+## Set 2.1
+set_2.1_WS_grouped <- group_by(set_2.1_WS_id, isolate, sample, batch)
+set_2.1_WR_grouped <- group_by(set_2.1_WR_id, isolate, sample, batch)
+
+## Set 2.2
+set_2.2_WS_grouped <- group_by(set_2.2_WS_id, isolate, sample, batch)
+set_2.2_WR_grouped <- group_by(set_2.2_WR_id, isolate, sample, batch)
+
+## Set 2.3
+set_2.3_WS_grouped <- group_by(set_2.3_WS_id, isolate, sample, batch)
+set_2.3_WR_grouped <- group_by(set_2.3_WR_id, isolate, sample, batch)
+
+## Set 2.4
+set_2.4_WS_grouped <- group_by(set_2.4_WS_id, isolate, sample, batch)
+set_2.4_WR_grouped <- group_by(set_2.4_WR_id, isolate, sample, batch)
+
+## Set 3.1
+set_3.1_WS_grouped <- group_by(set_3.1_WS_id, isolate, sample, batch)
+set_3.1_WR_grouped <- group_by(set_3.1_WR_id, isolate, sample, batch)
+
+## Set 3.2
+set_3.2_WS_grouped <- group_by(set_3.2_WS_id, isolate, sample, batch)
+set_3.2_WR_grouped <- group_by(set_3.2_WR_id, isolate, sample, batch)
+
+## Set 3.3
+set_3.3_WS_grouped <- group_by(set_3.3_WS_id, isolate, sample, batch)
+set_3.3_WR_grouped <- group_by(set_3.3_WR_id, isolate, sample, batch)
+
+## Set 3.4
+set_3.4_WS_grouped <- group_by(set_3.4_WS_id, isolate, sample, batch)
+set_3.4_WR_grouped <- group_by(set_3.4_WR_id, isolate, sample, batch)
+
+## Set 3.5
+set_3.5_WS_grouped <- group_by(set_3.5_WS_id, isolate, sample, batch)
+set_3.5_WR_grouped <- group_by(set_3.5_WR_id, isolate, sample, batch)
+
+## Set 4.1
+set_4.1_WS_grouped <- group_by(set_4.1_WS_id, isolate, sample, batch)
+set_4.1_WR_grouped <- group_by(set_4.1_WR_id, isolate, sample, batch)
+
+## Set 4.2
+set_4.2_WS_grouped <- group_by(set_4.2_WS_id, isolate, sample, batch)
+set_4.2_WR_grouped <- group_by(set_4.2_WR_id, isolate, sample, batch)
+
+## Set 4.3
+set_4.3_WS_grouped <- group_by(set_4.3_WS_id, isolate, sample, batch)
+set_4.3_WR_grouped <- group_by(set_4.3_WR_id, isolate, sample, batch)
+```
+
+
+# Create Stats Functions
+```{r}
+# Creating a function that provides 95% CI for the data vector using a t-distribution
+
+conf_int95 <- function(data) {
+    n <- length(data)
+    error <- qt(0.975, df=n-1) * sd(data, na.rm = TRUE)/sqrt(n)
+    return(error)
+}
+
+# Create a function that calculates the standard error for the data
+
+std_error <- function(data) {
+  n <- length(data)
+  se <- sd(data, na.rm = TRUE)/sqrt(n)
+  return(se)
+}
+
+```
+
+
+# Compute stats over triplicates for plotting
+```{r}
+
+# set 1
+stat_set_1_WS <- summarise(set_1_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_1_WR <- summarise(set_1_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.1
+stat_set_2.1_WS <- summarise(set_2.1_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.1_WR <- summarise(set_2.1_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.2
+stat_set_2.2_WS <- summarise(set_2.2_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.2_WR <- summarise(set_2.2_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.3
+stat_set_2.3_WS <- summarise(set_2.3_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.3_WR <- summarise(set_2.3_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.4
+stat_set_2.4_WS <- summarise(set_2.4_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.4_WR <- summarise(set_2.4_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.1
+stat_set_3.1_WS <- summarise(set_3.1_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.1_WR <- summarise(set_3.1_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.2
+stat_set_3.2_WS <- summarise(set_3.2_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.2_WR <- summarise(set_3.2_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.3
+stat_set_3.3_WS <- summarise(set_3.3_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.3_WR <- summarise(set_3.3_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.4
+stat_set_3.4_WS <- summarise(set_3.4_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.4_WR <- summarise(set_3.4_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.5
+stat_set_3.5_WS <- summarise(set_3.5_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.5_WR <- summarise(set_3.5_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 4.1
+stat_set_4.1_WS <- summarise(set_4.1_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_4.1_WR <- summarise(set_4.1_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 4.2
+stat_set_4.2_WS <- summarise(set_4.2_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_4.2_WR <- summarise(set_4.2_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 4.3
+stat_set_4.3_WS <- summarise(set_4.3_WS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_4.3_WR <- summarise(set_4.3_WR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+```
+
+## Wet Weight Plots
+
+### Set 1
+
+#### Wet Shoot
+
+##### With NAs
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Wet Shoot mg
+
+## remove control-WO
+
+stat_set_1_WS_NAs <- filter(stat_set_1_WS, isolate != "control-WO")
+
+set_1_WS_control_int <- as.numeric(stat_set_1_WS[58,5])
+#set_1_WS_control_int
+set_1_WS_bars_NA <- ggplot(stat_set_1_WS_NAs, aes(x = isolate, y = Average))
+set_1_WS_bars_NA <- set_1_WS_bars_NA + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_1_WS_bars_NA <- set_1_WS_bars_NA + geom_hline(yintercept=set_1_WS_control_int, colour="#990000", linetype="dashed")
+set_1_WS_bars_NA <- set_1_WS_bars_NA + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_1_WS_bars_NA <- set_1_WS_bars_NA + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_1_WS_bars_NA <- set_1_WS_bars_NA + theme(axis.text.x = element_text(angle = 75, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_1_WS_bars_NA <- set_1_WS_bars_NA + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_1_WS_bars_NA <- set_1_WS_bars_NA + scale_y_continuous(expand = c(0,0))
+set_1_WS_bars_NA <- set_1_WS_bars_NA + geom_text(aes(x=1, y=650, label="Stretch it"), vjust=-1)
+set_1_WS_bars_NA
+```
+
+##### Removed NAs
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s1_WS_complete <- stat_set_1_WS[complete.cases(stat_set_1_WS),]
+
+## remove control-WO
+stat_s1_WS_complete <- filter(stat_s1_WS_complete, isolate != "control-WO")
+
+## set the control value for Wet Shoot mg
+set_1_WS_control_int <- as.numeric(stat_s1_WS_complete[39,5])
+
+## calculate % control for each treatment
+stat_s1_WS_complete$control <- as.numeric(stat_s1_WS_complete[39,5])
+
+stat_s1_WS_complete <- mutate(stat_s1_WS_complete, p_ctrl = (100* (Average / control)))
+
+## Make the plot
+set_1_WS_bars <- ggplot(stat_s1_WS_complete, aes(x = isolate, y = Average))
+set_1_WS_bars <- set_1_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_1_WS_bars <- set_1_WS_bars + geom_hline(aes(yintercept=set_1_WS_control_int), colour="#990000", linetype="dashed")
+set_1_WS_bars <- set_1_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_1_WS_bars <- set_1_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+#set_1_WS_bars <- set_1_WS_bars + geom_text(aes(label=sprintf("%0.0f", round(p_ctrl, digits = 0)), y=Average+SE, vjust=-0.5), hjust = 0, angle = 45)
+set_1_WS_bars <- set_1_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_1_WS_bars <- set_1_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_1_WS_bars <- set_1_WS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,700))
+set_1_WS_bars <- set_1_WS_bars + geom_text(aes(x=isolate[24], y=640, label="205%"), hjust=0.38)
+set_1_WS_bars <- set_1_WS_bars + geom_text(aes(x=isolate[11], y=600, label="187%"), hjust=0.38)
+
+set_1_WS_bars
+```
+
+#### Wet Root
+
+##### With NAs
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove control-WO
+stat_set_1_WR_NAs <- filter(stat_set_1_WR, isolate != "control-WO")
+
+## set the control value for Wet Root mg
+set_1_WR_control_int <- as.numeric(stat_set_1_WR[58,5])
+
+set_1_WR_bars_NA <- ggplot(stat_set_1_WR_NAs, aes(x = isolate, y = Average))
+set_1_WR_bars_NA <- set_1_WR_bars_NA + geom_bar(stat = "identity", size=.5, fill="tan")
+set_1_WR_bars_NA <- set_1_WR_bars_NA + geom_hline(aes(yintercept=set_1_WR_control_int), colour="#990000", linetype="dashed")
+set_1_WR_bars_NA <- set_1_WR_bars_NA + labs(x="", y="Root - Fresh Weight (mg)")
+set_1_WR_bars_NA <- set_1_WR_bars_NA + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_1_WR_bars_NA <- set_1_WR_bars_NA + theme(axis.text.x = element_text(angle = 75, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_1_WR_bars_NA <- set_1_WR_bars_NA + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_1_WR_bars_NA <- set_1_WR_bars_NA + scale_y_continuous(expand = c(0,0))
+
+set_1_WR_bars_NA
+```
+
+##### Removed NAs
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s1_WR_complete <- stat_set_1_WR[complete.cases(stat_set_1_WR),]
+
+## remove control-WO
+stat_s1_WR_complete <- filter(stat_s1_WR_complete, isolate != "control-WO")
+
+## set the control value for Wet Root mg
+set_1_WR_control_int <- as.numeric(stat_s1_WR_complete[39,5])
+
+## calculate % control for each treatment
+stat_s1_WR_complete$control <- as.numeric(stat_s1_WR_complete[39,5])
+
+stat_s1_WR_complete <- mutate(stat_s1_WR_complete, p_ctrl = (100* (Average / control)))
+
+## Plot
+
+set_1_WR_bars <- ggplot(stat_s1_WR_complete, aes(x = isolate, y = Average))
+set_1_WR_bars <- set_1_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_1_WR_bars <- set_1_WR_bars + geom_hline(aes(yintercept=set_1_WR_control_int), colour="#990000", linetype="dashed")
+set_1_WR_bars <- set_1_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_1_WR_bars <- set_1_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_1_WR_bars <- set_1_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_1_WR_bars <- set_1_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_1_WR_bars <- set_1_WR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,220))
+set_1_WR_bars <- set_1_WR_bars + geom_text(aes(x=isolate[6], y=210, label="258%"), hjust=0.38)
+set_1_WR_bars <- set_1_WR_bars + geom_text(aes(x=isolate[5], y=165, label="253%"), hjust=0.44)
+set_1_WR_bars <- set_1_WR_bars + geom_text(aes(x=isolate[2], y=150, label="220%"), hjust=0.38)
+
+set_1_WR_bars
+```
+
+##### Cowplot - Set 1 - NA's Removed
+```{r, fig.width=10}
+
+set_1_wet_grid <- plot_grid(set_1_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_1_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_1_wet_grid
+
+ggsave("./Plots/set_1_wet_grid.pdf", set_1_wet_grid, width = 16, height = 16)
+```
+
+##### Cowplot - Set 1 - With NA's
+```{r, fig.width=10}
+set_1_wet_grid_NAs <- plot_grid(set_1_WS_bars_NA + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_1_WR_bars_NA + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            #vjust = 3,
+                            align = 'vh')
+set_1_wet_grid_NAs
+
+ggsave("./Plots/set_1_wet_grid_NAs.pdf", set_1_wet_grid_NAs, width = 16, height = 16)
+```
+
+### Set 2.1
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s2.1_WS_complete <- stat_set_2.1_WS[complete.cases(stat_set_2.1_WS),]
+
+## set the control value for Wet Shoot mg
+
+set_2.1_WS_control_int <- as.numeric(stat_s2.1_WS_complete[31,5])
+
+## calculate % control for each treatment
+stat_s2.1_WS_complete$control <- as.numeric(stat_s2.1_WS_complete[31,5])
+
+stat_s2.1_WS_complete <- mutate(stat_s2.1_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_2.1_WS_bars <- ggplot(stat_s2.1_WS_complete, aes(x = isolate, y = Average))
+set_2.1_WS_bars <- set_2.1_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.1_WS_bars <- set_2.1_WS_bars + geom_hline(aes(yintercept=set_2.1_WS_control_int), colour="#990000", linetype="dashed")
+set_2.1_WS_bars <- set_2.1_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_2.1_WS_bars <- set_2.1_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.1_WS_bars <- set_2.1_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.1_WS_bars <- set_2.1_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.1_WS_bars <- set_2.1_WS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,700))
+set_2.1_WS_bars <- set_2.1_WS_bars + geom_text(aes(x=isolate[12], y=590, label="301%"), hjust=0.38)
+set_2.1_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s2.1_WR_complete <- stat_set_2.1_WR[complete.cases(stat_set_2.1_WR),]
+
+## set the control value for Wet Root mg
+set_2.1_WR_control_int <- as.numeric(stat_s2.1_WR_complete[31,5])
+
+## calculate % control for each treatment
+stat_s2.1_WR_complete$control <- as.numeric(stat_s2.1_WR_complete[31,5])
+
+stat_s2.1_WR_complete <- mutate(stat_s2.1_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_2.1_WR_bars <- ggplot(stat_s2.1_WR_complete, aes(x = isolate, y = Average))
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_hline(aes(yintercept=set_2.1_WR_control_int), colour="#990000", linetype="dashed")
+set_2.1_WR_bars <- set_2.1_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.1_WR_bars <- set_2.1_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.1_WR_bars <- set_2.1_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.1_WR_bars <- set_2.1_WR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,180))
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_text(aes(x=isolate[24], y=138, label="288%"), hjust=0.38)
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_text(aes(x=isolate[21], y=136, label="274%"), hjust=0.44)
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_text(aes(x=isolate[18], y=125, label="265%"), hjust=0.38)
+set_2.1_WR_bars <- set_2.1_WR_bars + geom_text(aes(x=isolate[12], y=139.5, label="262%"), hjust=0.38)
+
+set_2.1_WR_bars
+```
+
+#### Cowplot - Set 2.1
+```{r, fig.width=10}
+set_2.1_wet_grid <- plot_grid(set_2.1_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.1_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_2.1_wet_grid
+
+ggsave("./Plots/set_2.1_wet_grid.pdf", set_2.1_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 2.2
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s2.2_WS_complete <- stat_set_2.2_WS[complete.cases(stat_set_2.2_WS),]
+
+## set the control value for Wet Shoot mg
+
+set_2.2_WS_control_int <- as.numeric(stat_s2.2_WS_complete[32,5])
+
+## calculate % control for each treatment
+stat_s2.2_WS_complete$control <- as.numeric(stat_s2.2_WS_complete[32,5])
+
+stat_s2.2_WS_complete <- mutate(stat_s2.2_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_2.2_WS_bars <- ggplot(stat_s2.2_WS_complete, aes(x = isolate, y = Average))
+set_2.2_WS_bars <- set_2.2_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.2_WS_bars <- set_2.2_WS_bars + geom_hline(aes(yintercept=set_2.2_WS_control_int), colour="#990000", linetype="dashed")
+set_2.2_WS_bars <- set_2.2_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_2.2_WS_bars <- set_2.2_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.2_WS_bars <- set_2.2_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.2_WS_bars <- set_2.2_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.2_WS_bars <- set_2.2_WS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,990))
+set_2.2_WS_bars <- set_2.2_WS_bars + geom_text(aes(x=isolate[26], y=945, label="285%"), hjust=0.38)
+set_2.2_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s2.2_WR_complete <- stat_set_2.2_WR[complete.cases(stat_set_2.2_WR),]
+
+## set the control value for Wet Root mg
+set_2.2_WR_control_int <- as.numeric(stat_s2.2_WR_complete[32,5])
+
+## calculate % control for each treatment
+stat_s2.2_WR_complete$control <- as.numeric(stat_s2.2_WR_complete[32,5])
+
+stat_s2.2_WR_complete <- mutate(stat_s2.2_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_2.2_WR_bars <- ggplot(stat_s2.2_WR_complete, aes(x = isolate, y = Average))
+set_2.2_WR_bars <- set_2.2_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.2_WR_bars <- set_2.2_WR_bars + geom_hline(aes(yintercept=set_2.2_WR_control_int), colour="#990000", linetype="dashed")
+set_2.2_WR_bars <- set_2.2_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_2.2_WR_bars <- set_2.2_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.2_WR_bars <- set_2.2_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.2_WR_bars <- set_2.2_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.2_WR_bars <- set_2.2_WR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,180))
+set_2.2_WR_bars <- set_2.2_WR_bars + geom_text(aes(x=isolate[26], y=170, label="226%"), hjust=0.38)
+set_2.2_WR_bars
+```
+
+#### Cowplot - Set 2.2
+```{r, fig.width=10}
+set_2.2_wet_grid <- plot_grid(set_2.2_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.2_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_2.2_wet_grid
+
+ggsave("./Plots/set_2.2_wet_grid.pdf", set_2.2_wet_grid, width = 16, height = 16)
+```
+
+### Set 2.3
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s2.3_WS_complete <- stat_set_2.3_WS[complete.cases(stat_set_2.3_WS),]
+
+## set the control value for Wet Shoot mg
+set_2.3_WS_control_int <- as.numeric(stat_s2.3_WS_complete[25,5])
+
+## calculate % control for each treatment
+stat_s2.3_WS_complete$control <- as.numeric(stat_s2.3_WS_complete[25,5])
+
+stat_s2.3_WS_complete <- mutate(stat_s2.3_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_2.3_WS_bars <- ggplot(stat_s2.3_WS_complete, aes(x = isolate, y = Average))
+set_2.3_WS_bars <- set_2.3_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.3_WS_bars <- set_2.3_WS_bars + geom_hline(aes(yintercept=set_2.3_WS_control_int), colour="#990000", linetype="dashed")
+set_2.3_WS_bars <- set_2.3_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_2.3_WS_bars <- set_2.3_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.3_WS_bars <- set_2.3_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.3_WS_bars <- set_2.3_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.3_WS_bars <- set_2.3_WS_bars + scale_y_continuous(expand = c(0,0))
+set_2.3_WS_bars <- set_2.3_WS_bars + geom_text(aes(x=1, y=650, label="Stretch it"), vjust=-1)
+set_2.3_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s2.3_WR_complete <- stat_set_2.3_WR[complete.cases(stat_set_2.3_WR),]
+
+## set the control value for Wet Root mg
+set_2.3_WR_control_int <- as.numeric(stat_s2.3_WR_complete[25,5])
+
+## calculate % control for each treatment
+stat_s2.3_WR_complete$control <- as.numeric(stat_s2.3_WR_complete[25,5])
+
+stat_s2.3_WR_complete <- mutate(stat_s2.3_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_2.3_WR_bars <- ggplot(stat_s2.3_WR_complete, aes(x = isolate, y = Average))
+set_2.3_WR_bars <- set_2.3_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.3_WR_bars <- set_2.3_WR_bars + geom_hline(aes(yintercept=set_2.3_WR_control_int), colour="#990000", linetype="dashed")
+set_2.3_WR_bars <- set_2.3_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_2.3_WR_bars <- set_2.3_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.3_WR_bars <- set_2.3_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.3_WR_bars <- set_2.3_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.3_WR_bars <- set_2.3_WR_bars + scale_y_continuous(expand = c(0,0))
+set_2.3_WR_bars <- set_2.3_WR_bars + geom_text(aes(x=1, y=195, label=""), vjust=-1)
+set_2.3_WR_bars
+```
+
+#### Cowplot - Set 2.3
+```{r, fig.width=10}
+set_2.3_wet_grid <- plot_grid(set_2.3_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.3_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_2.3_wet_grid
+
+ggsave("./Plots/set_2.3_wet_grid.pdf", set_2.3_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 2.4
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s2.4_WS_complete <- stat_set_2.4_WS[complete.cases(stat_set_2.4_WS),]
+
+## set the control value for Wet Shoot mg
+set_2.4_WS_control_int <- as.numeric(stat_s2.4_WS_complete[36,5])
+
+## calculate % control for each treatment
+stat_s2.4_WS_complete$control <- as.numeric(stat_s2.4_WS_complete[36,5])
+
+stat_s2.4_WS_complete <- mutate(stat_s2.4_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_2.4_WS_bars <- ggplot(stat_s2.4_WS_complete, aes(x = isolate, y = Average))
+set_2.4_WS_bars <- set_2.4_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.4_WS_bars <- set_2.4_WS_bars + geom_hline(aes(yintercept=set_2.4_WS_control_int), colour="#990000", linetype="dashed")
+set_2.4_WS_bars <- set_2.4_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_2.4_WS_bars <- set_2.4_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.4_WS_bars <- set_2.4_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.4_WS_bars <- set_2.4_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.4_WS_bars <- set_2.4_WS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,775))
+set_2.4_WS_bars <- set_2.4_WS_bars + geom_text(aes(x=isolate[34], y=735, label="256%"), hjust=0.38)
+set_2.4_WS_bars <- set_2.4_WS_bars + geom_text(aes(x=isolate[25], y=636, label="197%"), hjust=0.38)
+
+set_2.4_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s2.4_WR_complete <- stat_set_2.4_WR[complete.cases(stat_set_2.4_WR),]
+
+## set the control value for Wet Root mg
+set_2.4_WR_control_int <- as.numeric(stat_s2.4_WR_complete[36,5])
+
+## calculate % control for each treatment
+stat_s2.4_WR_complete$control <- as.numeric(stat_s2.4_WR_complete[36,5])
+
+stat_s2.4_WR_complete <- mutate(stat_s2.4_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_2.4_WR_bars <- ggplot(stat_s2.4_WR_complete, aes(x = isolate, y = Average))
+set_2.4_WR_bars <- set_2.4_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.4_WR_bars <- set_2.4_WR_bars + geom_hline(aes(yintercept=set_2.4_WR_control_int), colour="#990000", linetype="dashed")
+set_2.4_WR_bars <- set_2.4_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_2.4_WR_bars <- set_2.4_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.4_WR_bars <- set_2.4_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.4_WR_bars <- set_2.4_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.4_WR_bars <- set_2.4_WR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,175))
+set_2.4_WR_bars <- set_2.4_WR_bars + geom_text(aes(x=isolate[34], y=165, label="293%"), hjust=0.38)
+set_2.4_WR_bars
+```
+
+#### Cowplot - Set 2.4
+```{r, fig.width=10}
+set_2.4_wet_grid <- plot_grid(set_2.4_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.4_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_2.4_wet_grid
+
+ggsave("./Plots/set_2.4_wet_grid.pdf", set_2.4_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 3.1
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.1_WS_complete <- stat_set_3.1_WS[complete.cases(stat_set_3.1_WS),]
+
+## set the control value for Wet Shoot mg
+set_3.1_WS_control_int <- as.numeric(stat_s3.1_WS_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.1_WS_complete$control <- as.numeric(stat_s3.1_WS_complete[36,5])
+
+stat_s3.1_WS_complete <- mutate(stat_s3.1_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.1_WS_bars <- ggplot(stat_s3.1_WS_complete, aes(x = isolate, y = Average))
+set_3.1_WS_bars <- set_3.1_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.1_WS_bars <- set_3.1_WS_bars + geom_hline(aes(yintercept=set_3.1_WS_control_int), colour="#990000", linetype="dashed")
+set_3.1_WS_bars <- set_3.1_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_3.1_WS_bars <- set_3.1_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.1_WS_bars <- set_3.1_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.1_WS_bars <- set_3.1_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.1_WS_bars <- set_3.1_WS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,900))
+set_3.1_WS_bars <- set_3.1_WS_bars + geom_text(aes(x=isolate[18], y=814, label="233%"), hjust=0.38)
+set_3.1_WS_bars <- set_3.1_WS_bars + geom_text(aes(x=isolate[33], y=564, label="223%"), hjust=0.38)
+set_3.1_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.1_WR_complete <- stat_set_3.1_WR[complete.cases(stat_set_3.1_WR),]
+
+## set the control value for Wet Root mg
+set_3.1_WR_control_int <- as.numeric(stat_s3.1_WR_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.1_WR_complete$control <- as.numeric(stat_s3.1_WR_complete[36,5])
+
+stat_s3.1_WR_complete <- mutate(stat_s3.1_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.1_WR_bars <- ggplot(stat_s3.1_WR_complete, aes(x = isolate, y = Average))
+set_3.1_WR_bars <- set_3.1_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.1_WR_bars <- set_3.1_WR_bars + geom_hline(aes(yintercept=set_3.1_WR_control_int), colour="#990000", linetype="dashed")
+set_3.1_WR_bars <- set_3.1_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_3.1_WR_bars <- set_3.1_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.1_WR_bars <- set_3.1_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.1_WR_bars <- set_3.1_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.1_WR_bars <- set_3.1_WR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,145))
+set_3.1_WR_bars <- set_3.1_WR_bars + geom_text(aes(x=isolate[18], y=132, label="194%"), hjust=0.38)
+
+set_3.1_WR_bars
+```
+
+#### Cowplot - Set 3.1
+```{r, fig.width=10}
+set_3.1_wet_grid <- plot_grid(set_3.1_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.1_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_3.1_wet_grid
+
+ggsave("./Plots/set_3.1_wet_grid.pdf", set_3.1_wet_grid, width = 16, height = 16)
+
+```
+
+
+### Set 3.2
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.2_WS_complete <- stat_set_3.2_WS[complete.cases(stat_set_3.2_WS),]
+
+## set the control value for Wet Shoot mg
+set_3.2_WS_control_int <- as.numeric(stat_s3.2_WS_complete[24,5])
+
+## calculate % control for each treatment
+stat_s3.2_WS_complete$control <- as.numeric(stat_s3.2_WS_complete[24,5])
+
+stat_s3.2_WS_complete <- mutate(stat_s3.2_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.2_WS_bars <- ggplot(stat_s3.2_WS_complete, aes(x = isolate, y = Average))
+set_3.2_WS_bars <- set_3.2_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.2_WS_bars <- set_3.2_WS_bars + geom_hline(aes(yintercept=set_3.2_WS_control_int), colour="#990000", linetype="dashed")
+set_3.2_WS_bars <- set_3.2_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_3.2_WS_bars <- set_3.2_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.2_WS_bars <- set_3.2_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.2_WS_bars <- set_3.2_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.2_WS_bars <- set_3.2_WS_bars + scale_y_continuous(expand = c(0,0))
+set_3.2_WS_bars <- set_3.2_WS_bars + geom_text(aes(x=1, y=560, label="Stretch it"), vjust=-1)
+set_3.2_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.2_WR_complete <- stat_set_3.2_WR[complete.cases(stat_set_3.2_WR),]
+
+## set the control value for Wet Root mg
+set_3.2_WR_control_int <- as.numeric(stat_s3.2_WR_complete[24,5])
+
+## calculate % control for each treatment
+stat_s3.2_WR_complete$control <- as.numeric(stat_s3.2_WR_complete[24,5])
+
+stat_s3.2_WR_complete <- mutate(stat_s3.2_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.2_WR_bars <- ggplot(stat_s3.2_WR_complete, aes(x = isolate, y = Average))
+set_3.2_WR_bars <- set_3.2_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.2_WR_bars <- set_3.2_WR_bars + geom_hline(aes(yintercept=set_3.2_WR_control_int), colour="#990000", linetype="dashed")
+set_3.2_WR_bars <- set_3.2_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_3.2_WR_bars <- set_3.2_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.2_WR_bars <- set_3.2_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.2_WR_bars <- set_3.2_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.2_WR_bars <- set_3.2_WR_bars + scale_y_continuous(expand = c(0,0))
+set_3.2_WR_bars <- set_3.2_WR_bars + geom_text(aes(x=1, y=95, label=""), vjust=-1)
+set_3.2_WR_bars
+```
+
+#### Cowplot - Set 3.2
+```{r, fig.width=10}
+set_3.2_wet_grid <- plot_grid(set_3.2_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.2_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_3.2_wet_grid
+
+ggsave("./Plots/set_3.2_wet_grid.pdf", set_3.2_wet_grid, width = 16, height = 16)
+
+```
+
+
+
+### Set 3.3
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.3_WS_complete <- stat_set_3.3_WS[complete.cases(stat_set_3.3_WS),]
+
+## set the control value for Wet Shoot mg
+set_3.3_WS_control_int <- as.numeric(stat_s3.3_WS_complete[37,5])
+
+## calculate % control for each treatment
+stat_s3.3_WS_complete$control <- as.numeric(stat_s3.3_WS_complete[37,5])
+
+stat_s3.3_WS_complete <- mutate(stat_s3.3_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.3_WS_bars <- ggplot(stat_s3.3_WS_complete, aes(x = isolate, y = Average))
+set_3.3_WS_bars <- set_3.3_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.3_WS_bars <- set_3.3_WS_bars + geom_hline(aes(yintercept=set_3.3_WS_control_int), colour="#990000", linetype="dashed")
+set_3.3_WS_bars <- set_3.3_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_3.3_WS_bars <- set_3.3_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.3_WS_bars <- set_3.3_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.3_WS_bars <- set_3.3_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.3_WS_bars <- set_3.3_WS_bars + scale_y_continuous(expand = c(0,0))
+set_3.3_WS_bars <- set_3.3_WS_bars + geom_text(aes(x=1, y=990, label=""), vjust=-1)
+set_3.3_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.3_WR_complete <- stat_set_3.3_WR[complete.cases(stat_set_3.3_WR),]
+
+## set the control value for Wet Root mg
+set_3.3_WR_control_int <- as.numeric(stat_s3.3_WR_complete[37,5])
+
+## calculate % control for each treatment
+stat_s3.3_WR_complete$control <- as.numeric(stat_s3.3_WR_complete[37,5])
+
+stat_s3.3_WR_complete <- mutate(stat_s3.3_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.3_WR_bars <- ggplot(stat_s3.3_WR_complete, aes(x = isolate, y = Average))
+set_3.3_WR_bars <- set_3.3_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.3_WR_bars <- set_3.3_WR_bars + geom_hline(aes(yintercept=set_3.3_WR_control_int), colour="#990000", linetype="dashed")
+set_3.3_WR_bars <- set_3.3_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_3.3_WR_bars <- set_3.3_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.3_WR_bars <- set_3.3_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.3_WR_bars <- set_3.3_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.3_WR_bars <- set_3.3_WR_bars + scale_y_continuous(expand = c(0,0))
+set_3.3_WR_bars <- set_3.3_WR_bars + geom_text(aes(x=1, y=175, label=""), vjust=-1)
+set_3.3_WR_bars
+```
+
+#### Cowplot - Set 3.3
+```{r, fig.width=10}
+set_3.3_wet_grid <- plot_grid(set_3.3_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.3_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_3.3_wet_grid
+
+ggsave("./Plots/set_3.3_wet_grid.pdf", set_3.3_wet_grid, width = 16, height = 16)
+
+```
+
+
+### Set 3.4
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.4_WS_complete <- stat_set_3.4_WS[complete.cases(stat_set_3.4_WS),]
+
+## set the control value for Wet Shoot mg
+set_3.4_WS_control_int <- as.numeric(stat_s3.4_WS_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.4_WS_complete$control <- as.numeric(stat_s3.4_WS_complete[36,5])
+
+stat_s3.4_WS_complete <- mutate(stat_s3.4_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.4_WS_bars <- ggplot(stat_s3.4_WS_complete, aes(x = isolate, y = Average))
+set_3.4_WS_bars <- set_3.4_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.4_WS_bars <- set_3.4_WS_bars + geom_hline(aes(yintercept=set_3.4_WS_control_int), colour="#990000", linetype="dashed")
+set_3.4_WS_bars <- set_3.4_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_3.4_WS_bars <- set_3.4_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.4_WS_bars <- set_3.4_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.4_WS_bars <- set_3.4_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.4_WS_bars <- set_3.4_WS_bars + scale_y_continuous(expand = c(0,0))
+set_3.4_WS_bars <- set_3.4_WS_bars + geom_text(aes(x=1, y=580, label="Stretch it"), vjust=-1)
+set_3.4_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.4_WR_complete <- stat_set_3.4_WR[complete.cases(stat_set_3.4_WR),]
+
+## set the control value for Wet Root mg
+set_3.4_WR_control_int <- as.numeric(stat_s3.4_WR_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.4_WR_complete$control <- as.numeric(stat_s3.4_WR_complete[36,5])
+
+stat_s3.4_WR_complete <- mutate(stat_s3.4_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.4_WR_bars <- ggplot(stat_s3.4_WR_complete, aes(x = isolate, y = Average))
+set_3.4_WR_bars <- set_3.4_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.4_WR_bars <- set_3.4_WR_bars + geom_hline(aes(yintercept=set_3.4_WR_control_int), colour="#990000", linetype="dashed")
+set_3.4_WR_bars <- set_3.4_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_3.4_WR_bars <- set_3.4_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.4_WR_bars <- set_3.4_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.4_WR_bars <- set_3.4_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.4_WR_bars <- set_3.4_WR_bars + scale_y_continuous(expand = c(0,0))
+set_3.4_WR_bars <- set_3.4_WR_bars + geom_text(aes(x=1, y=90, label=""), vjust=-1)
+set_3.4_WR_bars
+```
+
+#### Cowplot - Set 3.4
+```{r, fig.width=10}
+set_3.4_wet_grid <- plot_grid(set_3.4_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.4_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_3.4_wet_grid
+
+ggsave("./Plots/set_3.4_wet_grid.pdf", set_3.4_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 3.5
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.5_WS_complete <- stat_set_3.5_WS[complete.cases(stat_set_3.5_WS),]
+
+## set the control value for Wet Shoot mg
+set_3.5_WS_control_int <- as.numeric(stat_s3.5_WS_complete[20,5])
+
+## calculate % control for each treatment
+stat_s3.5_WS_complete$control <- as.numeric(stat_s3.5_WS_complete[20,5])
+
+stat_s3.5_WS_complete <- mutate(stat_s3.5_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.5_WS_bars <- ggplot(stat_s3.5_WS_complete, aes(x = isolate, y = Average))
+set_3.5_WS_bars <- set_3.5_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.5_WS_bars <- set_3.5_WS_bars + geom_hline(aes(yintercept=set_3.5_WS_control_int), colour="#990000", linetype="dashed")
+set_3.5_WS_bars <- set_3.5_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_3.5_WS_bars <- set_3.5_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.5_WS_bars <- set_3.5_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.5_WS_bars <- set_3.5_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.5_WS_bars <- set_3.5_WS_bars + scale_y_continuous(expand = c(0,0))
+set_3.5_WS_bars <- set_3.5_WS_bars + geom_text(aes(x=1, y=580, label="Stretch it"), vjust=-1)
+set_3.5_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.5_WR_complete <- stat_set_3.5_WR[complete.cases(stat_set_3.5_WR),]
+
+## set the control value for Wet Root mg
+set_3.5_WR_control_int <- as.numeric(stat_s3.5_WR_complete[20,5])
+
+## calculate % control for each treatment
+stat_s3.5_WR_complete$control <- as.numeric(stat_s3.5_WR_complete[20,5])
+
+stat_s3.5_WR_complete <- mutate(stat_s3.5_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.5_WR_bars <- ggplot(stat_s3.5_WR_complete, aes(x = isolate, y = Average))
+set_3.5_WR_bars <- set_3.5_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.5_WR_bars <- set_3.5_WR_bars + geom_hline(aes(yintercept=set_3.5_WR_control_int), colour="#990000", linetype="dashed")
+set_3.5_WR_bars <- set_3.5_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_3.5_WR_bars <- set_3.5_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.5_WR_bars <- set_3.5_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.5_WR_bars <- set_3.5_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.5_WR_bars <- set_3.5_WR_bars + scale_y_continuous(expand = c(0,0))
+set_3.5_WR_bars <- set_3.5_WR_bars + geom_text(aes(x=1, y=99, label=""), vjust=-1)
+set_3.5_WR_bars
+```
+
+#### Cowplot - Set 3.5
+```{r, fig.width=10}
+set_3.5_wet_grid <- plot_grid(set_3.5_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.5_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_3.5_wet_grid
+
+ggsave("./Plots/set_3.5_wet_grid.pdf", set_3.5_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 4.1
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.1_WS_complete <- stat_set_4.1_WS[complete.cases(stat_set_4.1_WS),]
+
+## set the control value for Wet Shoot mg
+set_4.1_WS_control_int <- as.numeric(stat_s4.1_WS_complete[37,5])
+
+## calculate % control for each treatment
+stat_s4.1_WS_complete$control <- as.numeric(stat_s4.1_WS_complete[37,5])
+
+stat_s4.1_WS_complete <- mutate(stat_s4.1_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_4.1_WS_bars <- ggplot(stat_s4.1_WS_complete, aes(x = isolate, y = Average))
+set_4.1_WS_bars <- set_4.1_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_4.1_WS_bars <- set_4.1_WS_bars + geom_hline(aes(yintercept=set_4.1_WS_control_int), colour="#990000", linetype="dashed")
+set_4.1_WS_bars <- set_4.1_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_4.1_WS_bars <- set_4.1_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.1_WS_bars <- set_4.1_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.1_WS_bars <- set_4.1_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.1_WS_bars <- set_4.1_WS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,750))
+set_4.1_WS_bars <- set_4.1_WS_bars + geom_text(aes(x=isolate[25], y=680, label="189%"), hjust=0.38)
+set_4.1_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.1_WR_complete <- stat_set_4.1_WR[complete.cases(stat_set_4.1_WR),]
+
+## set the control value for Wet Root mg
+set_4.1_WR_control_int <- as.numeric(stat_s4.1_WR_complete[37,5])
+
+## calculate % control for each treatment
+stat_s4.1_WR_complete$control <- as.numeric(stat_s4.1_WR_complete[37,5])
+
+stat_s4.1_WR_complete <- mutate(stat_s4.1_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_4.1_WR_bars <- ggplot(stat_s4.1_WR_complete, aes(x = isolate, y = Average))
+set_4.1_WR_bars <- set_4.1_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_4.1_WR_bars <- set_4.1_WR_bars + geom_hline(aes(yintercept=set_4.1_WR_control_int), colour="#990000", linetype="dashed")
+set_4.1_WR_bars <- set_4.1_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_4.1_WR_bars <- set_4.1_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.1_WR_bars <- set_4.1_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.1_WR_bars <- set_4.1_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.1_WR_bars <- set_4.1_WR_bars + scale_y_continuous(expand = c(0,0))
+set_4.1_WR_bars <- set_4.1_WR_bars + geom_text(aes(x=1, y=59, label=""), vjust=-1)
+set_4.1_WR_bars
+```
+
+#### Cowplot - Set 4.1
+```{r, fig.width=10}
+set_4.1_wet_grid <- plot_grid(set_4.1_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_4.1_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_4.1_wet_grid
+
+ggsave("./Plots/set_4.1_wet_grid.pdf", set_4.1_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 4.2
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.2_WS_complete <- stat_set_4.2_WS[complete.cases(stat_set_4.2_WS),]
+
+## set the control value for Wet Shoot mg
+set_4.2_WS_control_int <- as.numeric(stat_s4.2_WS_complete[23,5])
+
+## calculate % control for each treatment
+stat_s4.2_WS_complete$control <- as.numeric(stat_s4.2_WS_complete[23,5])
+
+stat_s4.2_WS_complete <- mutate(stat_s4.2_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_4.2_WS_bars <- ggplot(stat_s4.2_WS_complete, aes(x = isolate, y = Average))
+set_4.2_WS_bars <- set_4.2_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_4.2_WS_bars <- set_4.2_WS_bars + geom_hline(aes(yintercept=set_4.2_WS_control_int), colour="#990000", linetype="dashed")
+set_4.2_WS_bars <- set_4.2_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_4.2_WS_bars <- set_4.2_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.2_WS_bars <- set_4.2_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.2_WS_bars <- set_4.2_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.2_WS_bars <- set_4.2_WS_bars + scale_y_continuous(expand = c(0,0))
+set_4.2_WS_bars <- set_4.2_WS_bars + geom_text(aes(x=1, y=590, label="Stretch it"), vjust=-1)
+set_4.2_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.2_WR_complete <- stat_set_4.2_WR[complete.cases(stat_set_4.2_WR),]
+
+## set the control value for Wet Root mg
+set_4.2_WR_control_int <- as.numeric(stat_s4.2_WR_complete[23,5])
+
+## calculate % control for each treatment
+stat_s4.2_WR_complete$control <- as.numeric(stat_s4.2_WR_complete[23,5])
+
+stat_s4.2_WR_complete <- mutate(stat_s4.2_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_4.2_WR_bars <- ggplot(stat_s4.2_WR_complete, aes(x = isolate, y = Average))
+set_4.2_WR_bars <- set_4.2_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_4.2_WR_bars <- set_4.2_WR_bars + geom_hline(aes(yintercept=set_4.2_WR_control_int), colour="#990000", linetype="dashed")
+set_4.2_WR_bars <- set_4.2_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_4.2_WR_bars <- set_4.2_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.2_WR_bars <- set_4.2_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.2_WR_bars <- set_4.2_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.2_WR_bars <- set_4.2_WR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,59))
+set_4.2_WR_bars <- set_4.2_WR_bars + geom_text(aes(x=isolate[6], y=55, label="317%"), hjust=0.38)
+set_4.2_WR_bars <- set_4.2_WR_bars + geom_text(aes(x=isolate[8], y=51, label="305%"), hjust=0.38)
+
+set_4.2_WR_bars
+```
+
+#### Cowplot - Set 4.2
+```{r, fig.width=10}
+set_4.2_wet_grid <- plot_grid(set_4.2_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_4.2_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_4.2_wet_grid
+
+ggsave("./Plots/set_4.2_wet_grid.pdf", set_4.2_wet_grid, width = 16, height = 16)
+
+```
+
+### Set 4.3
+
+#### Wet Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.3_WS_complete <- stat_set_4.3_WS[complete.cases(stat_set_4.3_WS),]
+
+## set the control value for Wet Shoot mg
+set_4.3_WS_control_int <- as.numeric(stat_s4.3_WS_complete[25,5])
+
+## calculate % control for each treatment
+stat_s4.3_WS_complete$control <- as.numeric(stat_s4.3_WS_complete[25,5])
+
+stat_s4.3_WS_complete <- mutate(stat_s4.3_WS_complete, p_ctrl = (100* (Average / control)))
+
+set_4.3_WS_bars <- ggplot(stat_s4.3_WS_complete, aes(x = isolate, y = Average))
+set_4.3_WS_bars <- set_4.3_WS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_4.3_WS_bars <- set_4.3_WS_bars + geom_hline(aes(yintercept=set_4.3_WS_control_int), colour="#990000", linetype="dashed")
+set_4.3_WS_bars <- set_4.3_WS_bars + labs(x="", y="Shoot - Fresh Weight (mg)")
+set_4.3_WS_bars <- set_4.3_WS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.3_WS_bars <- set_4.3_WS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.3_WS_bars <- set_4.3_WS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.3_WS_bars <- set_4.3_WS_bars + scale_y_continuous(expand = c(0,0))
+set_4.3_WS_bars <- set_4.3_WS_bars + geom_text(aes(x=1, y=495, label="Stretch it"), vjust=-1)
+set_4.3_WS_bars
+```
+
+#### Wet Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.3_WR_complete <- stat_set_4.3_WR[complete.cases(stat_set_4.3_WR),]
+
+## set the control value for Wet Root mg
+set_4.3_WR_control_int <- as.numeric(stat_s4.3_WR_complete[25,5])
+
+## calculate % control for each treatment
+stat_s4.3_WR_complete$control <- as.numeric(stat_s4.3_WR_complete[25,5])
+
+stat_s4.3_WR_complete <- mutate(stat_s4.3_WR_complete, p_ctrl = (100* (Average / control)))
+
+set_4.3_WR_bars <- ggplot(stat_s4.3_WR_complete, aes(x = isolate, y = Average))
+set_4.3_WR_bars <- set_4.3_WR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_4.3_WR_bars <- set_4.3_WR_bars + geom_hline(aes(yintercept=set_4.3_WR_control_int), colour="#990000", linetype="dashed")
+set_4.3_WR_bars <- set_4.3_WR_bars + labs(x="", y="Root - Fresh Weight (mg)")
+set_4.3_WR_bars <- set_4.3_WR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.3_WR_bars <- set_4.3_WR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.3_WR_bars <- set_4.3_WR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.3_WR_bars <- set_4.3_WR_bars + scale_y_continuous(expand = c(0,0))
+set_4.3_WR_bars <- set_4.3_WR_bars + geom_text(aes(x=1, y=49, label=""), vjust=-1)
+set_4.3_WR_bars
+```
+
+#### Cowplot - Set 4.3
+```{r, fig.width=10}
+set_4.3_wet_grid <- plot_grid(set_4.3_WS_bars + 
+                                theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_4.3_WR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("A", "B"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+set_4.3_wet_grid
+
+ggsave("./Plots/set_4.3_wet_grid.pdf", set_4.3_wet_grid, width = 16, height = 16)
+```
+
+# Add Batch ID to Dry Weight Dataframes
+```{r}
+# add batch id variable to each dataset
+
+## Set 1
+### Dry Shoot
+set_1_DS_id <- set_1_DS
+set_1_DS_id$batch <- c("Set 1")
+
+### Dry Root
+set_1_DR_id <- set_1_DR
+set_1_DR_id$batch <- c("Set 1")
+
+## Set 2.1
+### Dry Shoot
+set_2.1_DS_id <- set_2.1_DS
+set_2.1_DS_id$batch <- c("Set 2.1")
+
+### Dry Root
+set_2.1_DR_id <- set_2.1_DR
+set_2.1_DR_id$batch <- c("Set 2.1")
+
+## Set 2.2
+### Dry Shoot
+set_2.2_DS_id <- set_2.2_DS
+set_2.2_DS_id$batch <- c("Set 2.2")
+
+### Dry Root
+set_2.2_DR_id <- set_2.2_DR
+set_2.2_DR_id$batch <- c("Set 2.2")
+
+## Set 2.3
+### Dry Shoot
+set_2.3_DS_id <- set_2.3_DS
+set_2.3_DS_id$batch <- c("Set 2.3")
+
+### Dry Root
+set_2.3_DR_id <- set_2.3_DR
+set_2.3_DR_id$batch <- c("Set 2.3")
+
+## Set 2.4
+### Dry Shoot
+set_2.4_DS_id <- set_2.4_DS
+set_2.4_DS_id$batch <- c("Set 2.4")
+
+### Dry Root
+set_2.4_DR_id <- set_2.4_DR
+set_2.4_DR_id$batch <- c("Set 2.4")
+
+## Set 3.1
+### Dry Shoot
+set_3.1_DS_id <- set_3.1_DS
+set_3.1_DS_id$batch <- c("Set 3.1")
+
+### Dry Root
+set_3.1_DR_id <- set_3.1_DR
+set_3.1_DR_id$batch <- c("Set 3.1")
+
+## Set 3.2
+### Dry Shoot
+set_3.2_DS_id <- set_3.2_DS
+set_3.2_DS_id$batch <- c("Set 3.2")
+
+### Dry Root
+set_3.2_DR_id <- set_3.2_DR
+set_3.2_DR_id$batch <- c("Set 3.2")
+
+## Set 3.3
+### Dry Shoot
+set_3.3_DS_id <- set_3.3_DS
+set_3.3_DS_id$batch <- c("Set 3.3")
+
+### Dry Root
+set_3.3_DR_id <- set_3.3_DR
+set_3.3_DR_id$batch <- c("Set 3.3")
+
+## Set 3.4
+### Dry Shoot
+set_3.4_DS_id <- set_3.4_DS
+set_3.4_DS_id$batch <- c("Set 3.4")
+
+### Dry Root
+set_3.4_DR_id <- set_3.4_DR
+set_3.4_DR_id$batch <- c("Set 3.4")
+
+## Set 3.5
+### Dry Shoot
+set_3.5_DS_id <- set_3.5_DS
+set_3.5_DS_id$batch <- c("Set 3.5")
+
+### Dry Root
+set_3.5_DR_id <- set_3.5_DR
+set_3.5_DR_id$batch <- c("Set 3.5")
+
+## Set 4.1
+### Dry Shoot
+set_4.1_DS_id <- set_4.1_DS
+set_4.1_DS_id$batch <- c("Set 4.1")
+
+### Dry Root
+set_4.1_DR_id <- set_4.1_DR
+set_4.1_DR_id$batch <- c("Set 4.1")
+
+## Set 4.2
+### Dry Shoot
+set_4.2_DS_id <- set_4.2_DS
+set_4.2_DS_id$batch <- c("Set 4.2")
+
+### Dry Root
+set_4.2_DR_id <- set_4.2_DR
+set_4.2_DR_id$batch <- c("Set 4.2")
+
+## Set 4.3
+### Dry Shoot
+set_4.3_DS_id <- set_4.3_DS
+set_4.3_DS_id$batch <- c("Set 4.3")
+
+### Dry Root
+set_4.3_DR_id <- set_4.3_DR
+set_4.3_DR_id$batch <- c("Set 4.3")
+```
+
+# Group the Data for Plotting
+```{r}
+#Group the datasets based on Sample ID and prep method
+
+## Set 1
+set_1_DS_grouped <- group_by(set_1_DS_id, isolate, sample, batch)
+set_1_DR_grouped <- group_by(set_1_DR_id, isolate, sample, batch)
+
+## Set 2.1
+set_2.1_DS_grouped <- group_by(set_2.1_DS_id, isolate, sample, batch)
+set_2.1_DR_grouped <- group_by(set_2.1_DR_id, isolate, sample, batch)
+
+## Set 2.2
+set_2.2_DS_grouped <- group_by(set_2.2_DS_id, isolate, sample, batch)
+set_2.2_DR_grouped <- group_by(set_2.2_DR_id, isolate, sample, batch)
+
+## Set 2.3
+set_2.3_DS_grouped <- group_by(set_2.3_DS_id, isolate, sample, batch)
+set_2.3_DR_grouped <- group_by(set_2.3_DR_id, isolate, sample, batch)
+
+## Set 2.4
+set_2.4_DS_grouped <- group_by(set_2.4_DS_id, isolate, sample, batch)
+set_2.4_DR_grouped <- group_by(set_2.4_DR_id, isolate, sample, batch)
+
+## Set 3.1
+set_3.1_DS_grouped <- group_by(set_3.1_DS_id, isolate, sample, batch)
+set_3.1_DR_grouped <- group_by(set_3.1_DR_id, isolate, sample, batch)
+
+## Set 3.2
+set_3.2_DS_grouped <- group_by(set_3.2_DS_id, isolate, sample, batch)
+set_3.2_DR_grouped <- group_by(set_3.2_DR_id, isolate, sample, batch)
+
+## Set 3.3
+set_3.3_DS_grouped <- group_by(set_3.3_DS_id, isolate, sample, batch)
+set_3.3_DR_grouped <- group_by(set_3.3_DR_id, isolate, sample, batch)
+
+## Set 3.4
+set_3.4_DS_grouped <- group_by(set_3.4_DS_id, isolate, sample, batch)
+set_3.4_DR_grouped <- group_by(set_3.4_DR_id, isolate, sample, batch)
+
+## Set 3.5
+set_3.5_DS_grouped <- group_by(set_3.5_DS_id, isolate, sample, batch)
+set_3.5_DR_grouped <- group_by(set_3.5_DR_id, isolate, sample, batch)
+
+## Set 4.1
+set_4.1_DS_grouped <- group_by(set_4.1_DS_id, isolate, sample, batch)
+set_4.1_DR_grouped <- group_by(set_4.1_DR_id, isolate, sample, batch)
+
+## Set 4.2
+set_4.2_DS_grouped <- group_by(set_4.2_DS_id, isolate, sample, batch)
+set_4.2_DR_grouped <- group_by(set_4.2_DR_id, isolate, sample, batch)
+
+## Set 4.3
+set_4.3_DS_grouped <- group_by(set_4.3_DS_id, isolate, sample, batch)
+set_4.3_DR_grouped <- group_by(set_4.3_DR_id, isolate, sample, batch)
+```
+
+# Compute stats over triplicates for plotting
+```{r}
+
+# set 1
+stat_set_1_DS <- summarise(set_1_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_1_DR <- summarise(set_1_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.1
+stat_set_2.1_DS <- summarise(set_2.1_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.1_DR <- summarise(set_2.1_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.2
+stat_set_2.2_DS <- summarise(set_2.2_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.2_DR <- summarise(set_2.2_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.3
+stat_set_2.3_DS <- summarise(set_2.3_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.3_DR <- summarise(set_2.3_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 2.4
+stat_set_2.4_DS <- summarise(set_2.4_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_2.4_DR <- summarise(set_2.4_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.1
+stat_set_3.1_DS <- summarise(set_3.1_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.1_DR <- summarise(set_3.1_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.2
+stat_set_3.2_DS <- summarise(set_3.2_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.2_DR <- summarise(set_3.2_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.3
+stat_set_3.3_DS <- summarise(set_3.3_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.3_DR <- summarise(set_3.3_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.4
+stat_set_3.4_DS <- summarise(set_3.4_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.4_DR <- summarise(set_3.4_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 3.5
+stat_set_3.5_DS <- summarise(set_3.5_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_3.5_DR <- summarise(set_3.5_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 4.1
+stat_set_4.1_DS <- summarise(set_4.1_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_4.1_DR <- summarise(set_4.1_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 4.2
+stat_set_4.2_DS <- summarise(set_4.2_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_4.2_DR <- summarise(set_4.2_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+
+# set 4.3
+stat_set_4.3_DS <- summarise(set_4.3_DS_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+stat_set_4.3_DR <- summarise(set_4.3_DR_grouped, N=length(mg), Average=mean(mg, na.rm = TRUE), CI95=conf_int95(mg), SE=std_error(mg))
+```
+
+## Dry Weight Plots
+
+### Set 1
+
+#### Dry Shoot
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Shoot mg
+set_1_DS_control_int <- as.numeric(stat_set_1_DS[58,5])
+
+## remove isoaltes with NA values
+
+stat_s1_DS_complete <- stat_set_1_DS[complete.cases(stat_set_1_DS),]
+
+## remove control-WO
+
+stat_s1_DS_complete <- filter(stat_s1_DS_complete, isolate != "control-WO")
+
+## calculate % control for each treatment
+stat_s1_DS_complete$control <- as.numeric(stat_set_1_DS[58,5])
+
+stat_s1_DS_complete <- mutate(stat_s1_DS_complete, p_ctrl = (100* (Average / control)))
+
+## Make the plot
+set_1_DS_bars <- ggplot(stat_s1_DS_complete, aes(x = isolate, y = Average))
+set_1_DS_bars <- set_1_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_1_DS_bars <- set_1_DS_bars + geom_hline(aes(yintercept=set_1_DS_control_int), colour="#990000", linetype="dashed")
+set_1_DS_bars <- set_1_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_1_DS_bars <- set_1_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+#set_1_DS_bars <- set_1_DS_bars + geom_text(aes(label=sprintf("%0.0f", round(p_ctrl, digits = 0)), y=Average+SE, vjust=-0.5), hjust = 0, angle = 45)
+set_1_DS_bars <- set_1_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_1_DS_bars <- set_1_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_1_DS_bars <- set_1_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,45))
+set_1_DS_bars <- set_1_DS_bars + geom_text(aes(x=isolate[11], y=42, label="205%"), hjust=0.38)
+set_1_DS_bars
+```
+
+#### Dry Root
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s1_DR_complete <- stat_set_1_DR[complete.cases(stat_set_1_DR),]
+
+## remove control-WO
+stat_s1_DR_complete <- filter(stat_s1_DR_complete, isolate != "control-WO")
+
+## set the control value for Dry Shoot mg
+set_1_DR_control_int <- as.numeric(stat_s1_DR_complete[39,5])
+
+## calculate % control for each treatment
+stat_s1_DR_complete$control <- as.numeric(stat_set_1_DR[58,5])
+
+stat_s1_DR_complete <- mutate(stat_s1_DR_complete, p_ctrl = (100* (Average / control)))
+
+## Plot
+
+set_1_DR_bars <- ggplot(stat_s1_DR_complete, aes(x = isolate, y = Average))
+set_1_DR_bars <- set_1_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_1_DR_bars <- set_1_DR_bars + geom_hline(aes(yintercept=set_1_DR_control_int), colour="#990000", linetype="dashed")
+set_1_DR_bars <- set_1_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_1_DR_bars <- set_1_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_1_DR_bars <- set_1_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_1_DR_bars <- set_1_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_1_DR_bars <- set_1_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,19))
+set_1_DR_bars <- set_1_DR_bars + geom_text(aes(x=isolate[27], y=17, label="202%"), hjust=0.38)
+
+set_1_DR_bars
+```
+
+#### Cowplot - Set 1 - Full
+```{r, fig.width=10}
+
+set_1_dry_grid <- plot_grid(set_1_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_1_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_1_full_grid <- plot_grid(set_1_wet_grid,
+                             set_1_dry_grid,
+                             ncol = 2)
+set_1_full_grid
+
+ggsave("./Plots/set_1_full_grid.pdf", set_1_full_grid, width = 16, height = 16)
+
+```
+
+### Set 2.1
+
+#### Dry Shoot
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Shoot mg
+set_2.1_DS_control_int <- as.numeric(stat_set_2.1_DS[33,5])
+
+## remove isoaltes with NA values
+
+stat_s2.1_DS_complete <- stat_set_2.1_DS[complete.cases(stat_set_2.1_DS),]
+
+## remove control-WO
+
+stat_s2.1_DS_complete <- filter(stat_s2.1_DS_complete, isolate != "control-WO")
+
+## calculate % control for each treatment
+stat_s2.1_DS_complete$control <- as.numeric(stat_set_2.1_DS[33,5])
+
+stat_s2.1_DS_complete <- mutate(stat_s2.1_DS_complete, p_ctrl = (100* (Average / control)))
+
+## Make the plot
+set_2.1_DS_bars <- ggplot(stat_s2.1_DS_complete, aes(x = isolate, y = Average))
+set_2.1_DS_bars <- set_2.1_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.1_DS_bars <- set_2.1_DS_bars + geom_hline(aes(yintercept=set_2.1_DS_control_int), colour="#990000", linetype="dashed")
+set_2.1_DS_bars <- set_2.1_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_2.1_DS_bars <- set_2.1_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+#set_2.1_DS_bars <- set_2.1_DS_bars + geom_text(aes(label=sprintf("%0.0f", round(p_ctrl, digits = 0)), y=Average+SE, vjust=-0.5), hjust = 0, angle = 45)
+set_2.1_DS_bars <- set_2.1_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.1_DS_bars <- set_2.1_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.1_DS_bars <- set_2.1_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,45))
+set_2.1_DS_bars <- set_2.1_DS_bars + geom_text(aes(x=isolate[12], y=41, label="323%"), hjust=0.38)
+set_2.1_DS_bars
+```
+
+#### Dry Root
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Root mg
+
+## remove isoaltes with NA values
+
+stat_s2.1_DR_complete <- stat_set_2.1_DR[complete.cases(stat_set_2.1_DR),]
+
+## remove control-WO
+
+stat_s2.1_DR_complete <- filter(stat_s2.1_DR_complete, isolate != "control-WO")
+
+set_2.1_DR_control_int <- as.numeric(stat_s2.1_DR_complete[31,5])
+
+## calculate % control for each treatment
+stat_s2.1_DR_complete$control <- as.numeric(stat_set_2.1_DR[31,5])
+
+stat_s2.1_DR_complete <- mutate(stat_s2.1_DR_complete, p_ctrl = (100* (Average / control)))
+
+## Plot
+
+set_2.1_DR_bars <- ggplot(stat_s2.1_DR_complete, aes(x = isolate, y = Average))
+set_2.1_DR_bars <- set_2.1_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.1_DR_bars <- set_2.1_DR_bars + geom_hline(aes(yintercept=set_2.1_DR_control_int), colour="#990000", linetype="dashed")
+set_2.1_DR_bars <- set_2.1_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_2.1_DR_bars <- set_2.1_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.1_DR_bars <- set_2.1_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.1_DR_bars <- set_2.1_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.1_DR_bars <- set_2.1_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,11.5))
+set_2.1_DR_bars <- set_2.1_DR_bars + geom_text(aes(x=isolate[24], y=10.5, label="190%"), hjust=0.38)
+set_2.1_DR_bars <- set_2.1_DR_bars + geom_text(aes(x=isolate[21], y=10, label="182%"), hjust=0.38)
+
+set_2.1_DR_bars
+```
+
+#### Cowplot - Set 2.1 - Full
+```{r, fig.width=10}
+set_2.1_dry_grid <- plot_grid(set_2.1_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.1_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_2.1_full_grid <- plot_grid(set_2.1_wet_grid,
+                             set_2.1_dry_grid,
+                             ncol = 2)
+set_2.1_full_grid
+
+ggsave("./Plots/set_2.1_full_grid.pdf", set_2.1_full_grid, width = 16, height = 16)
+
+```
+
+### Set 2.2
+
+#### Dry Shoot
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Shoot mg
+set_2.2_DS_control_int <- as.numeric(stat_set_2.2_DS[33,5])
+
+## remove isoaltes with NA values
+
+stat_s2.2_DS_complete <- stat_set_2.2_DS[complete.cases(stat_set_2.2_DS),]
+
+## remove control-WO
+
+stat_s2.2_DS_complete <- filter(stat_s2.2_DS_complete, isolate != "control-WO")
+
+## calculate % control for each treatment
+stat_s2.2_DS_complete$control <- as.numeric(stat_set_2.2_DS[33,5])
+
+stat_s2.2_DS_complete <- mutate(stat_s2.2_DS_complete, p_ctrl = (100* (Average / control)))
+
+## Make the plot
+set_2.2_DS_bars <- ggplot(stat_s2.2_DS_complete, aes(x = isolate, y = Average))
+set_2.2_DS_bars <- set_2.2_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.2_DS_bars <- set_2.2_DS_bars + geom_hline(aes(yintercept=set_2.2_DS_control_int), colour="#990000", linetype="dashed")
+set_2.2_DS_bars <- set_2.2_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_2.2_DS_bars <- set_2.2_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+#set_2.2_DS_bars <- set_2.2_DS_bars + geom_text(aes(label=sprintf("%0.0f", round(p_ctrl, digits = 0)), y=Average+SE, vjust=-0.5), hjust = 0, angle = 45)
+set_2.2_DS_bars <- set_2.2_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.2_DS_bars <- set_2.2_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.2_DS_bars <- set_2.2_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,65))
+set_2.2_DS_bars <- set_2.2_DS_bars + geom_text(aes(x=isolate[26], y=61, label="318%"), hjust=0.38)
+set_2.2_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Root mg
+
+## remove isoaltes with NA values
+
+stat_s2.2_DR_complete <- stat_set_2.2_DR[complete.cases(stat_set_2.2_DR),]
+
+## remove control-WO
+
+stat_s2.2_DR_complete <- filter(stat_s2.2_DR_complete, isolate != "control-WO")
+
+set_2.2_DR_control_int <- as.numeric(stat_s2.2_DR_complete[32,5])
+
+## calculate % control for each treatment
+stat_s2.2_DR_complete$control <- as.numeric(stat_set_2.2_DR[32,5])
+
+stat_s2.2_DR_complete <- mutate(stat_s2.2_DR_complete, p_ctrl = (100* (Average / control)))
+
+## Plot
+
+set_2.2_DR_bars <- ggplot(stat_s2.2_DR_complete, aes(x = isolate, y = Average))
+set_2.2_DR_bars <- set_2.2_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.2_DR_bars <- set_2.2_DR_bars + geom_hline(aes(yintercept=set_2.2_DR_control_int), colour="#990000", linetype="dashed")
+set_2.2_DR_bars <- set_2.2_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_2.2_DR_bars <- set_2.2_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.2_DR_bars <- set_2.2_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.2_DR_bars <- set_2.2_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.2_DR_bars <- set_2.2_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,13.8))
+set_2.2_DR_bars <- set_2.2_DR_bars + geom_text(aes(x=isolate[26], y=13, label="237%"), hjust=0.38)
+
+set_2.2_DR_bars
+```
+
+### Cowplot - Set 2.2 - Full
+```{r, fig.width=10}
+set_2.2_dry_grid <- plot_grid(set_2.2_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.2_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_2.2_full_grid <- plot_grid(set_2.2_wet_grid,
+                             set_2.2_dry_grid,
+                             ncol = 2)
+set_2.2_full_grid
+
+ggsave("./Plots/set_2.2_full_grid.pdf", set_2.2_full_grid, width = 16, height = 16)
+
+```
+
+### Set 2.3
+
+#### Dry Shoot
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Shoot mg
+set_2.3_DS_control_int <- as.numeric(stat_set_2.3_DS[28,5])
+
+## remove isoaltes with NA values
+
+stat_s2.3_DS_complete <- stat_set_2.3_DS[complete.cases(stat_set_2.3_DS),]
+
+## remove control-WO
+
+stat_s2.3_DS_complete <- filter(stat_s2.3_DS_complete, isolate != "control-WO")
+
+## calculate % control for each treatment
+stat_s2.3_DS_complete$control <- as.numeric(stat_set_2.3_DS[28,5])
+
+stat_s2.3_DS_complete <- mutate(stat_s2.3_DS_complete, p_ctrl = (100* (Average / control)))
+
+## Make the plot
+set_2.3_DS_bars <- ggplot(stat_s2.3_DS_complete, aes(x = isolate, y = Average))
+set_2.3_DS_bars <- set_2.3_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.3_DS_bars <- set_2.3_DS_bars + geom_hline(aes(yintercept=set_2.3_DS_control_int), colour="#990000", linetype="dashed")
+set_2.3_DS_bars <- set_2.3_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_2.3_DS_bars <- set_2.3_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+#set_2.3_DS_bars <- set_2.3_DS_bars + geom_text(aes(label=sprintf("%0.0f", round(p_ctrl, digits = 0)), y=Average+SE, vjust=-0.5), hjust = 0, angle = 45)
+set_2.3_DS_bars <- set_2.3_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.3_DS_bars <- set_2.3_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.3_DS_bars <- set_2.3_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,45))
+#set_2.3_DS_bars <- set_2.3_DS_bars + geom_text(aes(x=isolate[26], y=61, label="318%"), hjust=0.38)
+set_2.3_DS_bars
+```
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Root mg
+
+## remove isoaltes with NA values
+
+stat_s2.3_DR_complete <- stat_set_2.3_DR[complete.cases(stat_set_2.3_DR),]
+
+## remove control-WO
+
+stat_s2.3_DR_complete <- filter(stat_s2.3_DR_complete, isolate != "control-WO")
+
+set_2.3_DR_control_int <- as.numeric(stat_s2.3_DR_complete[25,5])
+
+## calculate % control for each treatment
+stat_s2.3_DR_complete$control <- as.numeric(stat_set_2.3_DR[25,5])
+
+stat_s2.3_DR_complete <- mutate(stat_s2.3_DR_complete, p_ctrl = (100* (Average / control)))
+
+## Plot
+
+set_2.3_DR_bars <- ggplot(stat_s2.3_DR_complete, aes(x = isolate, y = Average))
+set_2.3_DR_bars <- set_2.3_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.3_DR_bars <- set_2.3_DR_bars + geom_hline(aes(yintercept=set_2.3_DR_control_int), colour="#990000", linetype="dashed")
+set_2.3_DR_bars <- set_2.3_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_2.3_DR_bars <- set_2.3_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.3_DR_bars <- set_2.3_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.3_DR_bars <- set_2.3_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.3_DR_bars <- set_2.3_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,17.5))
+#set_2.3_DR_bars <- set_2.3_DR_bars + geom_text(aes(x=isolate[26], y=13, label="237%"), hjust=0.38)
+
+set_2.3_DR_bars
+```
+
+### Cowplot - Set 2.3 - Full
+```{r, fig.width=10}
+set_2.3_dry_grid <- plot_grid(set_2.3_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.3_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_2.3_full_grid <- plot_grid(set_2.3_wet_grid,
+                             set_2.3_dry_grid,
+                             ncol = 2)
+set_2.3_full_grid
+
+ggsave("./Plots/set_2.3_full_grid.pdf", set_2.3_full_grid, width = 16, height = 16)
+
+```
+
+### Set 2.4
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Shoot mg
+set_2.4_DS_control_int <- as.numeric(stat_set_2.4_DS[37,5])
+
+## remove isoaltes with NA values
+
+stat_s2.4_DS_complete <- stat_set_2.4_DS[complete.cases(stat_set_2.4_DS),]
+
+## remove control-WO
+
+stat_s2.4_DS_complete <- filter(stat_s2.4_DS_complete, isolate != "control-WO")
+
+## calculate % control for each treatment
+stat_s2.4_DS_complete$control <- as.numeric(stat_set_2.4_DS[37,5])
+
+stat_s2.4_DS_complete <- mutate(stat_s2.4_DS_complete, p_ctrl = (100* (Average / control)))
+
+## Make the plot
+set_2.4_DS_bars <- ggplot(stat_s2.4_DS_complete, aes(x = isolate, y = Average))
+set_2.4_DS_bars <- set_2.4_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_2.4_DS_bars <- set_2.4_DS_bars + geom_hline(aes(yintercept=set_2.4_DS_control_int), colour="#990000", linetype="dashed")
+set_2.4_DS_bars <- set_2.4_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_2.4_DS_bars <- set_2.4_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+#set_2.4_DS_bars <- set_2.4_DS_bars + geom_text(aes(label=sprintf("%0.0f", round(p_ctrl, digits = 0)), y=Average+SE, vjust=-0.5), hjust = 0, angle = 45)
+set_2.4_DS_bars <- set_2.4_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.4_DS_bars <- set_2.4_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.4_DS_bars <- set_2.4_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,55))
+set_2.4_DS_bars <- set_2.4_DS_bars + geom_text(aes(x=isolate[25], y=51, label="251%"), hjust=0.38)
+set_2.4_DS_bars <- set_2.4_DS_bars + geom_text(aes(x=isolate[34], y=47, label="262%"), hjust=0.38)
+
+set_2.4_DS_bars
+```
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## set the control value for Dry Root mg
+
+## remove isoaltes with NA values
+
+stat_s2.4_DR_complete <- stat_set_2.4_DR[complete.cases(stat_set_2.4_DR),]
+
+## remove control-WO
+
+stat_s2.4_DR_complete <- filter(stat_s2.4_DR_complete, isolate != "control-WO")
+
+set_2.4_DR_control_int <- as.numeric(stat_s2.4_DR_complete[36,5])
+
+## calculate % control for each treatment
+stat_s2.4_DR_complete$control <- as.numeric(stat_set_2.4_DR[36,5])
+
+stat_s2.4_DR_complete <- mutate(stat_s2.4_DR_complete, p_ctrl = (100* (Average / control)))
+
+## Plot
+
+set_2.4_DR_bars <- ggplot(stat_s2.4_DR_complete, aes(x = isolate, y = Average))
+set_2.4_DR_bars <- set_2.4_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_2.4_DR_bars <- set_2.4_DR_bars + geom_hline(aes(yintercept=set_2.4_DR_control_int), colour="#990000", linetype="dashed")
+set_2.4_DR_bars <- set_2.4_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_2.4_DR_bars <- set_2.4_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_2.4_DR_bars <- set_2.4_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_2.4_DR_bars <- set_2.4_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_2.4_DR_bars <- set_2.4_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,14))
+set_2.4_DR_bars <- set_2.4_DR_bars + geom_text(aes(x=isolate[34], y=10, label="198%"), hjust=0.38)
+
+set_2.4_DR_bars
+```
+
+### Cowplot - Set 2.4 - Full
+```{r, fig.width=10}
+set_2.4_dry_grid <- plot_grid(set_2.4_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_2.4_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_2.4_full_grid <- plot_grid(set_2.4_wet_grid,
+                             set_2.4_dry_grid,
+                             ncol = 2)
+set_2.4_full_grid
+
+ggsave("./Plots/set_2.4_full_grid.pdf", set_2.4_full_grid, width = 16, height = 16)
+
+```
+
+### Set 3.1
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s3.1_DS_complete <- stat_set_3.1_DS[complete.cases(stat_set_3.1_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_3.1_DS_control_int <- as.numeric(stat_s3.1_DS_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.1_DS_complete$control <- as.numeric(stat_s3.1_DS_complete[36,5])
+
+stat_s3.1_DS_complete <- mutate(stat_s3.1_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.1_DS_bars <- ggplot(stat_s3.1_DS_complete, aes(x = isolate, y = Average))
+set_3.1_DS_bars <- set_3.1_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.1_DS_bars <- set_3.1_DS_bars + geom_hline(aes(yintercept=set_3.1_DS_control_int), colour="#990000", linetype="dashed")
+set_3.1_DS_bars <- set_3.1_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_3.1_DS_bars <- set_3.1_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.1_DS_bars <- set_3.1_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.1_DS_bars <- set_3.1_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.1_DS_bars <- set_3.1_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,45))
+#set_3.1_DS_bars <- set_3.1_DS_bars + geom_text(aes(x=isolate[18], y=814, label="233%"), hjust=0.38)
+set_3.1_DS_bars <- set_3.1_DS_bars + geom_text(aes(x=isolate[33], y=36, label="277%"), hjust=0.38)
+set_3.1_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.1_DR_complete <- stat_set_3.1_DR[complete.cases(stat_set_3.1_DR),]
+
+## set the control value for Dry Shoot mg
+set_3.1_DR_control_int <- as.numeric(stat_s3.1_DR_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.1_DR_complete$control <- as.numeric(stat_s3.1_DR_complete[36,5])
+
+stat_s3.1_DR_complete <- mutate(stat_s3.1_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.1_DR_bars <- ggplot(stat_s3.1_DR_complete, aes(x = isolate, y = Average))
+set_3.1_DR_bars <- set_3.1_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.1_DR_bars <- set_3.1_DR_bars + geom_hline(aes(yintercept=set_3.1_DR_control_int), colour="#990000", linetype="dashed")
+set_3.1_DR_bars <- set_3.1_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_3.1_DR_bars <- set_3.1_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.1_DR_bars <- set_3.1_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.1_DR_bars <- set_3.1_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.1_DR_bars <- set_3.1_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,7.9))
+set_3.1_DR_bars <- set_3.1_DR_bars + geom_text(aes(x=isolate[18], y=6, label="211%"), hjust=0.38)
+set_3.1_DR_bars <- set_3.1_DR_bars + geom_text(aes(x=isolate[23], y=7.7, label="250%"), hjust=0.38)
+
+set_3.1_DR_bars
+```
+
+### Cowplot - Set 3.1 - Full
+```{r, fig.width=10}
+set_3.1_dry_grid <- plot_grid(set_3.1_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.1_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_3.1_full_grid <- plot_grid(set_3.1_wet_grid,
+                             set_3.1_dry_grid,
+                             ncol = 2)
+set_3.1_full_grid
+
+ggsave("./Plots/set_3.1_full_grid.pdf", set_3.1_full_grid, width = 16, height = 16)
+
+```
+
+### Set 3.2
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s3.2_DS_complete <- stat_set_3.2_DS[complete.cases(stat_set_3.2_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_3.2_DS_control_int <- as.numeric(stat_s3.2_DS_complete[24,5])
+
+## calculate % control for each treatment
+stat_s3.2_DS_complete$control <- as.numeric(stat_s3.2_DS_complete[24,5])
+
+stat_s3.2_DS_complete <- mutate(stat_s3.2_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.2_DS_bars <- ggplot(stat_s3.2_DS_complete, aes(x = isolate, y = Average))
+set_3.2_DS_bars <- set_3.2_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.2_DS_bars <- set_3.2_DS_bars + geom_hline(aes(yintercept=set_3.2_DS_control_int), colour="#990000", linetype="dashed")
+set_3.2_DS_bars <- set_3.2_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_3.2_DS_bars <- set_3.2_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.2_DS_bars <- set_3.2_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.2_DS_bars <- set_3.2_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.2_DS_bars <- set_3.2_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,29))
+
+set_3.2_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.2_DR_complete <- stat_set_3.2_DR[complete.cases(stat_set_3.2_DR),]
+
+## set the control value for Dry Shoot mg
+set_3.2_DR_control_int <- as.numeric(stat_s3.2_DR_complete[24,5])
+
+## calculate % control for each treatment
+stat_s3.2_DR_complete$control <- as.numeric(stat_s3.2_DR_complete[24,5])
+
+stat_s3.2_DR_complete <- mutate(stat_s3.2_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.2_DR_bars <- ggplot(stat_s3.2_DR_complete, aes(x = isolate, y = Average))
+set_3.2_DR_bars <- set_3.2_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.2_DR_bars <- set_3.2_DR_bars + geom_hline(aes(yintercept=set_3.2_DR_control_int), colour="#990000", linetype="dashed")
+set_3.2_DR_bars <- set_3.2_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_3.2_DR_bars <- set_3.2_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.2_DR_bars <- set_3.2_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.2_DR_bars <- set_3.2_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.2_DR_bars <- set_3.2_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,7.9))
+#set_3.2_DR_bars <- set_3.2_DR_bars + geom_text(aes(x=isolate[18], y=6, label="211%"), hjust=0.38)
+#set_3.2_DR_bars <- set_3.2_DR_bars + geom_text(aes(x=isolate[23], y=7.7, label="250%"), hjust=0.38)
+
+set_3.2_DR_bars
+```
+
+### Cowplot - Set 3.2 - Full
+```{r, fig.width=10}
+set_3.2_dry_grid <- plot_grid(set_3.2_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.2_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_3.2_full_grid <- plot_grid(set_3.2_wet_grid,
+                             set_3.2_dry_grid,
+                             ncol = 2)
+set_3.2_full_grid
+
+ggsave("./Plots/set_3.2_full_grid.pdf", set_3.2_full_grid, width = 16, height = 16)
+
+```
+
+### Set 3.3
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s3.3_DS_complete <- stat_set_3.3_DS[complete.cases(stat_set_3.3_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_3.3_DS_control_int <- as.numeric(stat_s3.3_DS_complete[37,5])
+
+## calculate % control for each treatment
+stat_s3.3_DS_complete$control <- as.numeric(stat_s3.3_DS_complete[37,5])
+
+stat_s3.3_DS_complete <- mutate(stat_s3.3_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.3_DS_bars <- ggplot(stat_s3.3_DS_complete, aes(x = isolate, y = Average))
+set_3.3_DS_bars <- set_3.3_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.3_DS_bars <- set_3.3_DS_bars + geom_hline(aes(yintercept=set_3.3_DS_control_int), colour="#990000", linetype="dashed")
+set_3.3_DS_bars <- set_3.3_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_3.3_DS_bars <- set_3.3_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.3_DS_bars <- set_3.3_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.3_DS_bars <- set_3.3_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.3_DS_bars <- set_3.3_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,49))
+
+set_3.3_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.3_DR_complete <- stat_set_3.3_DR[complete.cases(stat_set_3.3_DR),]
+
+## set the control value for Dry Shoot mg
+set_3.3_DR_control_int <- as.numeric(stat_s3.3_DR_complete[37,5])
+
+## calculate % control for each treatment
+stat_s3.3_DR_complete$control <- as.numeric(stat_s3.3_DR_complete[37,5])
+
+stat_s3.3_DR_complete <- mutate(stat_s3.3_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.3_DR_bars <- ggplot(stat_s3.3_DR_complete, aes(x = isolate, y = Average))
+set_3.3_DR_bars <- set_3.3_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.3_DR_bars <- set_3.3_DR_bars + geom_hline(aes(yintercept=set_3.3_DR_control_int), colour="#990000", linetype="dashed")
+set_3.3_DR_bars <- set_3.3_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_3.3_DR_bars <- set_3.3_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.3_DR_bars <- set_3.3_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.3_DR_bars <- set_3.3_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.3_DR_bars <- set_3.3_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,8.9))
+
+set_3.3_DR_bars
+```
+
+### Cowplot - Set 3.3 - Full
+```{r, fig.width=10}
+set_3.3_dry_grid <- plot_grid(set_3.3_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.3_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_3.3_full_grid <- plot_grid(set_3.3_wet_grid,
+                             set_3.3_dry_grid,
+                             ncol = 2)
+set_3.3_full_grid
+
+ggsave("./Plots/set_3.3_full_grid.pdf", set_3.3_full_grid, width = 16, height = 16)
+
+```
+
+### Set 3.4
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s3.4_DS_complete <- stat_set_3.4_DS[complete.cases(stat_set_3.4_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_3.4_DS_control_int <- as.numeric(stat_s3.4_DS_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.4_DS_complete$control <- as.numeric(stat_s3.4_DS_complete[36,5])
+
+stat_s3.4_DS_complete <- mutate(stat_s3.4_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.4_DS_bars <- ggplot(stat_s3.4_DS_complete, aes(x = isolate, y = Average))
+set_3.4_DS_bars <- set_3.4_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.4_DS_bars <- set_3.4_DS_bars + geom_hline(aes(yintercept=set_3.4_DS_control_int), colour="#990000", linetype="dashed")
+set_3.4_DS_bars <- set_3.4_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_3.4_DS_bars <- set_3.4_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.4_DS_bars <- set_3.4_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.4_DS_bars <- set_3.4_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.4_DS_bars <- set_3.4_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,35))
+
+set_3.4_DS_bars <- set_3.4_DS_bars + geom_text(aes(x=isolate[17], y=31.5, label="150%"), hjust=0.38)
+
+set_3.4_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.4_DR_complete <- stat_set_3.4_DR[complete.cases(stat_set_3.4_DR),]
+
+## set the control value for Dry Shoot mg
+set_3.4_DR_control_int <- as.numeric(stat_s3.4_DR_complete[36,5])
+
+## calculate % control for each treatment
+stat_s3.4_DR_complete$control <- as.numeric(stat_s3.4_DR_complete[36,5])
+
+stat_s3.4_DR_complete <- mutate(stat_s3.4_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.4_DR_bars <- ggplot(stat_s3.4_DR_complete, aes(x = isolate, y = Average))
+set_3.4_DR_bars <- set_3.4_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.4_DR_bars <- set_3.4_DR_bars + geom_hline(aes(yintercept=set_3.4_DR_control_int), colour="#990000", linetype="dashed")
+set_3.4_DR_bars <- set_3.4_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_3.4_DR_bars <- set_3.4_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.4_DR_bars <- set_3.4_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.4_DR_bars <- set_3.4_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.4_DR_bars <- set_3.4_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,8.9))
+
+set_3.4_DR_bars <- set_3.4_DR_bars + geom_text(aes(x=isolate[6], y=6.3, label="134%"), hjust=0.38)
+
+set_3.4_DR_bars
+```
+
+### Cowplot - Set 3.4 - Full
+```{r, fig.width=10}
+set_3.4_dry_grid <- plot_grid(set_3.4_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.4_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_3.4_full_grid <- plot_grid(set_3.4_wet_grid,
+                             set_3.4_dry_grid,
+                             ncol = 2)
+set_3.4_full_grid
+
+ggsave("./Plots/set_3.4_full_grid.pdf", set_3.4_full_grid, width = 16, height = 16)
+
+```
+
+### Set 3.5
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s3.5_DS_complete <- stat_set_3.5_DS[complete.cases(stat_set_3.5_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_3.5_DS_control_int <- as.numeric(stat_s3.5_DS_complete[20,5])
+
+## calculate % control for each treatment
+stat_s3.5_DS_complete$control <- as.numeric(stat_s3.5_DS_complete[20,5])
+
+stat_s3.5_DS_complete <- mutate(stat_s3.5_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_3.5_DS_bars <- ggplot(stat_s3.5_DS_complete, aes(x = isolate, y = Average))
+set_3.5_DS_bars <- set_3.5_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_3.5_DS_bars <- set_3.5_DS_bars + geom_hline(aes(yintercept=set_3.5_DS_control_int), colour="#990000", linetype="dashed")
+set_3.5_DS_bars <- set_3.5_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_3.5_DS_bars <- set_3.5_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.5_DS_bars <- set_3.5_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.5_DS_bars <- set_3.5_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.5_DS_bars <- set_3.5_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,29))
+
+set_3.5_DS_bars <- set_3.5_DS_bars + geom_text(aes(x=isolate[11], y=27, label="150%"), hjust=0.38)
+
+set_3.5_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s3.5_DR_complete <- stat_set_3.5_DR[complete.cases(stat_set_3.5_DR),]
+
+## set the control value for Dry Shoot mg
+set_3.5_DR_control_int <- as.numeric(stat_s3.5_DR_complete[20,5])
+
+## calculate % control for each treatment
+stat_s3.5_DR_complete$control <- as.numeric(stat_s3.5_DR_complete[20,5])
+
+stat_s3.5_DR_complete <- mutate(stat_s3.5_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_3.5_DR_bars <- ggplot(stat_s3.5_DR_complete, aes(x = isolate, y = Average))
+set_3.5_DR_bars <- set_3.5_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_3.5_DR_bars <- set_3.5_DR_bars + geom_hline(aes(yintercept=set_3.5_DR_control_int), colour="#990000", linetype="dashed")
+set_3.5_DR_bars <- set_3.5_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_3.5_DR_bars <- set_3.5_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_3.5_DR_bars <- set_3.5_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_3.5_DR_bars <- set_3.5_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_3.5_DR_bars <- set_3.5_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,5.7))
+
+set_3.5_DR_bars
+```
+
+### Cowplot - Set 3.5 - Full
+```{r, fig.width=10}
+set_3.5_dry_grid <- plot_grid(set_3.5_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_3.5_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_3.5_full_grid <- plot_grid(set_3.5_wet_grid,
+                             set_3.5_dry_grid,
+                             ncol = 2)
+set_3.5_full_grid
+
+ggsave("./Plots/set_3.5_full_grid.pdf", set_3.5_full_grid, width = 16, height = 16)
+
+```
+
+### Set 4.1
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s4.1_DS_complete <- stat_set_4.1_DS[complete.cases(stat_set_4.1_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_4.1_DS_control_int <- as.numeric(stat_s4.1_DS_complete[37,5])
+
+## calculate % control for each treatment
+stat_s4.1_DS_complete$control <- as.numeric(stat_s4.1_DS_complete[37,5])
+
+stat_s4.1_DS_complete <- mutate(stat_s4.1_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_4.1_DS_bars <- ggplot(stat_s4.1_DS_complete, aes(x = isolate, y = Average))
+set_4.1_DS_bars <- set_4.1_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_4.1_DS_bars <- set_4.1_DS_bars + geom_hline(aes(yintercept=set_4.1_DS_control_int), colour="#990000", linetype="dashed")
+set_4.1_DS_bars <- set_4.1_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_4.1_DS_bars <- set_4.1_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.1_DS_bars <- set_4.1_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.1_DS_bars <- set_4.1_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.1_DS_bars <- set_4.1_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,45))
+
+set_4.1_DS_bars <- set_4.1_DS_bars + geom_text(aes(x=isolate[16], y=37, label="165%"), hjust=0.38)
+
+set_4.1_DS_bars <- set_4.1_DS_bars + geom_text(aes(x=isolate[25], y=42, label="180%"), hjust=0.38)
+
+set_4.1_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.1_DR_complete <- stat_set_4.1_DR[complete.cases(stat_set_4.1_DR),]
+
+## set the control value for Dry Shoot mg
+set_4.1_DR_control_int <- as.numeric(stat_s4.1_DR_complete[37,5])
+
+## calculate % control for each treatment
+stat_s4.1_DR_complete$control <- as.numeric(stat_s4.1_DR_complete[37,5])
+
+stat_s4.1_DR_complete <- mutate(stat_s4.1_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_4.1_DR_bars <- ggplot(stat_s4.1_DR_complete, aes(x = isolate, y = Average))
+set_4.1_DR_bars <- set_4.1_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_4.1_DR_bars <- set_4.1_DR_bars + geom_hline(aes(yintercept=set_4.1_DR_control_int), colour="#990000", linetype="dashed")
+set_4.1_DR_bars <- set_4.1_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_4.1_DR_bars <- set_4.1_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.1_DR_bars <- set_4.1_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.1_DR_bars <- set_4.1_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.1_DR_bars <- set_4.1_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,5.7))
+
+set_4.1_DR_bars
+```
+
+### Cowplot - Set 4.1 - Full
+```{r, fig.width=10}
+set_4.1_dry_grid <- plot_grid(set_4.1_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_4.1_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_4.1_full_grid <- plot_grid(set_4.1_wet_grid,
+                             set_4.1_dry_grid,
+                             ncol = 2)
+set_4.1_full_grid
+
+ggsave("./Plots/set_4.1_full_grid.pdf", set_4.1_full_grid, width = 16, height = 16)
+
+```
+
+### Set 4.2
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s4.2_DS_complete <- stat_set_4.2_DS[complete.cases(stat_set_4.2_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_4.2_DS_control_int <- as.numeric(stat_s4.2_DS_complete[23,5])
+
+## calculate % control for each treatment
+stat_s4.2_DS_complete$control <- as.numeric(stat_s4.2_DS_complete[23,5])
+
+stat_s4.2_DS_complete <- mutate(stat_s4.2_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_4.2_DS_bars <- ggplot(stat_s4.2_DS_complete, aes(x = isolate, y = Average))
+set_4.2_DS_bars <- set_4.2_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_4.2_DS_bars <- set_4.2_DS_bars + geom_hline(aes(yintercept=set_4.2_DS_control_int), colour="#990000", linetype="dashed")
+set_4.2_DS_bars <- set_4.2_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_4.2_DS_bars <- set_4.2_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.2_DS_bars <- set_4.2_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.2_DS_bars <- set_4.2_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.2_DS_bars <- set_4.2_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,52))
+
+set_4.2_DS_bars <- set_4.2_DS_bars + geom_text(aes(x=isolate[8], y=42, label="242%"), hjust=0.38)
+
+set_4.2_DS_bars <- set_4.2_DS_bars + geom_text(aes(x=isolate[17], y=38, label="203%"), hjust=0.38)
+
+set_4.2_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.2_DR_complete <- stat_set_4.2_DR[complete.cases(stat_set_4.2_DR),]
+
+## set the control value for Dry Shoot mg
+set_4.2_DR_control_int <- as.numeric(stat_s4.2_DR_complete[23,5])
+
+## calculate % control for each treatment
+stat_s4.2_DR_complete$control <- as.numeric(stat_s4.2_DR_complete[23,5])
+
+stat_s4.2_DR_complete <- mutate(stat_s4.2_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_4.2_DR_bars <- ggplot(stat_s4.2_DR_complete, aes(x = isolate, y = Average))
+set_4.2_DR_bars <- set_4.2_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_4.2_DR_bars <- set_4.2_DR_bars + geom_hline(aes(yintercept=set_4.2_DR_control_int), colour="#990000", linetype="dashed")
+set_4.2_DR_bars <- set_4.2_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_4.2_DR_bars <- set_4.2_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.2_DR_bars <- set_4.2_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.2_DR_bars <- set_4.2_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.2_DR_bars <- set_4.2_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,5.7))
+
+set_4.2_DR_bars <- set_4.2_DR_bars + geom_text(aes(x=isolate[6], y=4.5, label="392%"), hjust=0.38)
+
+set_4.2_DR_bars <- set_4.2_DR_bars + geom_text(aes(x=isolate[8], y=4.7, label="420%"), hjust=0.38)
+
+set_4.2_DR_bars
+```
+
+### Cowplot - Set 4.2 - Full
+```{r, fig.width=10}
+set_4.2_dry_grid <- plot_grid(set_4.2_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_4.2_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_4.2_full_grid <- plot_grid(set_4.2_wet_grid,
+                             set_4.2_dry_grid,
+                             ncol = 2)
+set_4.2_full_grid
+
+ggsave("./Plots/set_4.2_full_grid.pdf", set_4.2_full_grid, width = 16, height = 16)
+
+```
+
+### Set 4.3
+
+#### Dry Shoot
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+
+stat_s4.3_DS_complete <- stat_set_4.3_DS[complete.cases(stat_set_4.3_DS),]
+
+## set the control value for Dry Shoot mg
+
+set_4.3_DS_control_int <- as.numeric(stat_s4.3_DS_complete[25,5])
+
+## calculate % control for each treatment
+stat_s4.3_DS_complete$control <- as.numeric(stat_s4.3_DS_complete[25,5])
+
+stat_s4.3_DS_complete <- mutate(stat_s4.3_DS_complete, p_ctrl = (100* (Average / control)))
+
+set_4.3_DS_bars <- ggplot(stat_s4.3_DS_complete, aes(x = isolate, y = Average))
+set_4.3_DS_bars <- set_4.3_DS_bars + geom_bar(stat = "identity", size=.5, fill="lightgreen")
+set_4.3_DS_bars <- set_4.3_DS_bars + geom_hline(aes(yintercept=set_4.3_DS_control_int), colour="#990000", linetype="dashed")
+set_4.3_DS_bars <- set_4.3_DS_bars + labs(x="", y="Shoot - Dry Weight (mg)")
+set_4.3_DS_bars <- set_4.3_DS_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.3_DS_bars <- set_4.3_DS_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.3_DS_bars <- set_4.3_DS_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.3_DS_bars <- set_4.3_DS_bars + scale_y_continuous(expand = c(0,0), limits = c(0,35))
+
+set_4.3_DS_bars
+```
+
+#### Dry Root
+
+```{r, fig.width = 10}
+# ggplot with bars
+
+## remove isoaltes with NA values
+stat_s4.3_DR_complete <- stat_set_4.3_DR[complete.cases(stat_set_4.3_DR),]
+
+## set the control value for Dry Shoot mg
+set_4.3_DR_control_int <- as.numeric(stat_s4.3_DR_complete[25,5])
+
+## calculate % control for each treatment
+stat_s4.3_DR_complete$control <- as.numeric(stat_s4.3_DR_complete[25,5])
+
+stat_s4.3_DR_complete <- mutate(stat_s4.3_DR_complete, p_ctrl = (100* (Average / control)))
+
+set_4.3_DR_bars <- ggplot(stat_s4.3_DR_complete, aes(x = isolate, y = Average))
+set_4.3_DR_bars <- set_4.3_DR_bars + geom_bar(stat = "identity", size=.5, fill="tan")
+set_4.3_DR_bars <- set_4.3_DR_bars + geom_hline(aes(yintercept=set_4.3_DR_control_int), colour="#990000", linetype="dashed")
+set_4.3_DR_bars <- set_4.3_DR_bars + labs(x="", y="Root - Dry Weight (mg)")
+set_4.3_DR_bars <- set_4.3_DR_bars + geom_errorbar(aes(ymin=Average-SE, ymax=Average+SE), size=.5, width=.2)
+set_4.3_DR_bars <- set_4.3_DR_bars + theme(axis.text.x = element_text(angle = 60, hjust = 1, size = 12),
+                                       axis.text.y = element_text(size = 12),
+                                       axis.title.x = element_blank(),
+                                       axis.title.y = element_text(size = 14),
+                                       legend.text = element_text(size = 16),
+                                       legend.title = element_text(size = 16))
+set_4.3_DR_bars <- set_4.3_DR_bars + scale_x_discrete(position = "bottom", expand = c(0,0))
+set_4.3_DR_bars <- set_4.3_DR_bars + scale_y_continuous(expand = c(0,0), limits = c(0,3.9))
+
+set_4.3_DR_bars
+```
+
+### Cowplot - Set 4.3 - Full
+```{r, fig.width=10}
+set_4.3_dry_grid <- plot_grid(set_4.3_DS_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            set_4.3_DR_bars + theme(plot.margin = unit(c(.1,.1,.1,.1), "cm")),
+                            labels = c("C", "D"),
+                            label_size = 24,
+                            nrow = 2,
+                            ncol = 1,
+                            align = 'vh')
+
+set_4.3_full_grid <- plot_grid(set_4.3_wet_grid,
+                             set_4.3_dry_grid,
+                             ncol = 2)
+set_4.3_full_grid
+
+ggsave("./Plots/set_4.3_full_grid.pdf", set_4.3_full_grid, width = 16, height = 16)
+
+```
+
+## Table 2
+
+> Statistically Significant Isolates based on Wet Weight Measruements
+
+### Create Master Dataframe of Plot Weights
+```{r, warning=FALSE, message=FALSE}
+# Create lists of dfs for wet shoot complete cases
+wet_shoot_stat_list <- mget(ls(pattern = "stat_.+_WS_complete"))
+wet_root_stat_list <- mget(ls(pattern = "stat_.+_WR_complete"))
+dry_shoot_stat_list <- mget(ls(pattern = "stat_.+_DS_complete"))
+dry_root_stat_list <- mget(ls(pattern = "stat_.+_DR_complete"))
+
+## Bind rows
+wet_shoot_master <- bind_rows(wet_shoot_stat_list)
+wet_root_master <- bind_rows(wet_root_stat_list)
+dry_shoot_master <- bind_rows(dry_shoot_stat_list)
+dry_root_master <- bind_rows(dry_root_stat_list)
+
+```
+
+> create master dataframe of lsmeans_data for each sample type
+
+> trt.vs.control
+
+> p-value correction for multiple testing using DunnettX method
+
+> confidence level used = 0.95 or alpha = 0.05
+
+### Read in csv files
+
+```{r, message=FALSE, warning=FALSE}
+# Make lists of files for dataframes
+
+## Dry Root files
+paths.lsm.dun.DR <- list.files(path = "./lsmeans_summary_tables/", pattern = "*.DR.csv", recursive = T, full.names = T)
+
+## Dry Shoot files
+paths.lsm.dun.DS <- list.files(path = "./lsmeans_summary_tables/", pattern = "*.DS.csv", recursive = T, full.names = T)
+
+## Wet Root files
+paths.lsm.dun.WR <- list.files(path = "./lsmeans_summary_tables/", pattern = "*.WR.csv", recursive = T, full.names = T)
+
+## Wet Shoot files
+paths.lsm.dun.WS <- list.files(path = "./lsmeans_summary_tables/", pattern = "*.WS.csv", recursive = T, full.names = T)
+
+# Read in lists of DR files
+list.lsm.dun.DR <- lapply(paths.lsm.dun.DR, read_csv)
+
+# Read in lists of DS files
+list.lsm.dun.DS <- lapply(paths.lsm.dun.DS, read_csv)
+
+# Read in lists of WR files
+list.lsm.dun.WR <- lapply(paths.lsm.dun.WR, read_csv)
+
+# Read in lists of WS files
+list.lsm.dun.WS <- lapply(paths.lsm.dun.WS, read_csv)
+```
+
+### Bind Rows
+
+> Make a master dataframe
+
+```{r}
+# Dry Roots
+lsm.dun.DR.master <- bind_rows(list.lsm.dun.DR)
+
+# Dry Shoots
+lsm.dun.DS.master <- bind_rows(list.lsm.dun.DS)
+
+# Wet Roots
+lsm.dun.WR.master <- bind_rows(list.lsm.dun.WR)
+
+# Wet Shoots
+lsm.dun.WS.master <- bind_rows(list.lsm.dun.WS)
+```
+
+# Add Isolate names and response type
+```{r}
+# Dry Roots
+## Extract Isolate ID from contrast variable
+lsm.dun.DR.master <- lsm.dun.DR.master %>% 
+  extract(contrast, into = "Isolate", regex = "(^[0-9]+)", remove = FALSE)
+
+## Create BCW-ID variable
+lsm.dun.DR.master <- lsm.dun.DR.master %>% 
+  mutate("BCW-ID" = paste0("BCW-", Isolate)) %>%
+  mutate("Response" = "Dry Root")
+
+# Dry Shoots
+## Extract Isolate ID from contrast variable
+lsm.dun.DS.master <- lsm.dun.DS.master %>% 
+  extract(contrast, into = "Isolate", regex = "(^[0-9]+)", remove = FALSE)
+
+## Create BCW-ID variable
+lsm.dun.DS.master <- lsm.dun.DS.master %>%
+  mutate("BCW-ID" = paste0("BCW-", Isolate)) %>%
+  mutate("Response" = "Dry Shoot")
+
+# Wet Roots
+## Extract Isolate ID from contrast variable
+lsm.dun.WR.master <- lsm.dun.WR.master %>% 
+  extract(contrast, into = "Isolate", regex = "(^[0-9]+)", remove = FALSE)
+
+## Create BCW-ID variable
+lsm.dun.WR.master <- lsm.dun.WR.master %>%
+  mutate("BCW-ID" = paste0("BCW-", Isolate)) %>%
+  mutate("Response" = "Fresh Root")
+
+# Wet Shoots
+## Extract Isolate ID from contrast variable
+lsm.dun.WS.master <- lsm.dun.WS.master %>% 
+  extract(contrast, into = "Isolate", regex = "(^[0-9]+)", remove = FALSE)
+
+## Create BCW-ID variable
+lsm.dun.WS.master <- lsm.dun.WS.master %>%
+  mutate("BCW-ID" = paste0("BCW-", Isolate)) %>%
+  mutate("Response" = "Fresh Shoot")
+```
+
+# Add Percent Control Variable
+```{r}
+# Dry Root
+lsm.dun.DR.master$p_control <- dry_root_master$p_ctrl[match(lsm.dun.DR.master$Isolate,
+                                                            dry_root_master$isolate)]
+# Dry Shoot
+lsm.dun.DS.master$p_control <- dry_shoot_master$p_ctrl[match(lsm.dun.DS.master$Isolate,
+                                                            dry_shoot_master$isolate)]
+# Wet Root
+lsm.dun.WR.master$p_control <- wet_root_master$p_ctrl[match(lsm.dun.WR.master$Isolate,
+                                                            wet_root_master$isolate)]
+# Wet Shoot
+lsm.dun.WS.master$p_control <- wet_shoot_master$p_ctrl[match(lsm.dun.WS.master$Isolate,
+                                                            wet_shoot_master$isolate)]
+```
+
+# Select variables and filter
+```{r}
+# Wet Shoot
+t2.WS.master <- lsm.dun.WS.master %>%
+  select(`BCW-ID`, estimate, SE, p.value, Response, p_control) %>%
+  filter(p_control > 100 &
+           p.value < 0.1 &
+           estimate > 0)
+
+# Wet Root
+t2.WR.master <- lsm.dun.WR.master %>%
+  select(`BCW-ID`, estimate, SE, p.value, Response, p_control) %>%
+  filter(p_control > 100 &
+           p.value < 0.1 &
+           estimate > 0)
+
+# Dry Shoot
+t2.DS.master <- lsm.dun.DS.master %>%
+  select(`BCW-ID`, estimate, SE, p.value, Response, p_control) %>%
+  filter(p_control > 100 &
+           p.value < 0.1 &
+           estimate > 0)
+
+# Dry Root
+t2.DR.master <- lsm.dun.DR.master %>%
+  select(`BCW-ID`, estimate, SE, p.value, Response, p_control) %>%
+  filter(p_control > 100 &
+           p.value < 0.1 &
+           estimate > 0)
+
+# Combine
+t2_list_master <- mget(ls(pattern = "t2.*.master"))
+
+t2.master <- bind_rows(t2_list_master)
+```
+
+## Add Genus info
+```{r}
+# read in abb to bcw map file
+abb_bcw_labels <- read_csv("./metadata/abb_genome_bcw_labels.csv", col_names = TRUE)
+abb_bcw_labels$BCW_ID <- sub("_", "-", abb_bcw_labels$BCW_ID)
+
+# read in sourmash lca data of whole genome signatures
+sourmash_lca <- read_csv("./metadata/lca-classify-all-k31-gtdb89.csv", col_names = TRUE)
+
+## empty cells are 'unassigned'
+sourmash_lca <- sourmash_lca %>%
+  replace(., is.na(.), "Unassigned")
+
+# read in sourmash lca of genome bin signatures
+#sourmash_lca.bins <- read_csv("./metadata/sm-lca-metabat-all-k31.csv")
+#
+### add leading zeros to ABB_IDs that require
+#sourmash_lca.bins$Isolate[1:9] <- paste0("00", sourmash_lca.bins$Isolate[1:9])
+#sourmash_lca.bins$Isolate[10:92] <- paste0("0", sourmash_lca.bins$Isolate[10:92])
+#
+### add BCW ID to bin classification table
+#sourmash_lca.bins$`BCW-ID` <- abb_bcw_labels$BCW_ID[match(sourmash_lca.bins$Isolate, #abb_bcw_labels$ABB_ID)]
+#
+### add 'unassigned' to genus column
+#sourmash_lca.bins$genus <- sourmash_lca.bins$genus %>% replace_na("unassigned")
+
+# Add Genus variable
+t2.master$Genus <- sourmash_lca$genus[match(t2.master$`BCW-ID`, sourmash_lca$ID)]
+
+## Filter, adjust, sort
+t2.master <- t2.master %>%
+  drop_na() %>% # remove NAs for taxonomy - these are eukaryotes.
+  mutate(Genus = replace(Genus, str_detect(Genus, "Unassigned"), "Enterobacter")) %>% # adjust taxonomy based on Genbank classification
+  select( Genus, `BCW-ID`, Response, estimate, SE, p.value, p_control) %>%
+  arrange(Genus, `BCW-ID`)
+
+## sigfigs
+### p-value
+t2.master <- t2.master %>% 
+  mutate_at(., c("p.value"), round, digits = 6) %>%
+  mutate_at(., c("p.value"), formatC, format = "e", digits = 2)
+
+### response variables
+t2.master <- t2.master %>%
+  mutate_at(., c("estimate", "SE", "p_control"), round, digits = 2)
+
+# write to csv
+write_csv(t2.master, "./tables/MS2-table_2.csv", col_names = TRUE)
+```
+
+```{r}
+t2.master.2 <- t2.master
+
+# Add Genus variable
+t2.master.2 <- t2.master.2 %>%
+  full_join(sourmash_lca, by = c("BCW-ID" = "ID")) %>%
+  drop_na()
+```
+
